@@ -1,4 +1,4 @@
-package org.edward.pandora.turbosnail.util;
+package org.edward.pandora.common.util;
 
 public class DataUtil {
     public static String toHexString(byte b) {

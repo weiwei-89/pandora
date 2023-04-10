@@ -3,7 +3,7 @@ package org.edward.pandora.turbosnail.decoder;
 import org.edward.pandora.turbosnail.Papers;
 import org.edward.pandora.turbosnail.decoder.model.Data;
 import org.edward.pandora.turbosnail.decoder.model.Info;
-import org.edward.pandora.turbosnail.util.DataUtil;
+import org.edward.pandora.common.util.DataUtil;
 import org.edward.pandora.turbosnail.xml.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
