@@ -41,11 +41,12 @@ public class Box {
         if(targetFields==null || targetFields.length==0) {
             return null;
         }
-        EnumInstance enumInstance = new EnumInstance();
+        EnumInstance enumInstance = new EnumInstance(targetFields.length);
         for(Field targetField : targetFields) {
             if(!targetField.isEnumConstant()) {
                 continue;
             }
+            targetField.setAccessible(true);
             enumInstance.put(targetField.getName(), (Enum)targetField.get(targetClass));
         }
         return enumInstance;
@@ -59,7 +60,7 @@ public class Box {
         if(targetFields==null || targetFields.length==0) {
             return null;
         }
-        EnumInfo enumInfo = new EnumInfo();
+        EnumInfo enumInfo = new EnumInfo(targetFields.length);
         for(Field targetField : targetFields) {
             targetField.setAccessible(true);
             Object targetFieldValue = targetField.get(target);
@@ -77,6 +78,7 @@ public class Box {
         int count = 0;
         Iterator<?> iterator = objectList.iterator();
         while(iterator.hasNext()) {
+            iterator.next();
             count++;
         }
         return count;

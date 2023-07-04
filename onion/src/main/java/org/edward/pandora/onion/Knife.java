@@ -7,10 +7,7 @@ import org.edward.pandora.onion.bind.model.Peel;
 import org.edward.pandora.onion.tool.Box;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Knife {
     private final Map<String, List<EnumInfo>> convertDefinitionCache = new HashMap<>();
@@ -23,19 +20,46 @@ public class Knife {
         return new Knife();
     }
 
-    public Peel peel(Object target) throws Exception {
+    public Object peel(Object target) throws Exception {
         if(target == null) {
             return null;
         }
-        if(target instanceof Map) {
-            Map<String, Object> targetMap = (Map<String, Object>) target;
-            Peel firstPeel = new Peel(targetMap.size());
-            for(Map.Entry<String, Object> entry : targetMap.entrySet()) {
-                Peel peel = new Peel();
-                this.peel(entry.getValue(), peel);
-                firstPeel.put(entry.getKey(), peel);
+        if(target instanceof Iterable) {
+            Iterable<?> targetList = (Iterable<?>) target;
+            int targetCount = Box.getListCount(targetList);
+            if(targetCount == 0) {
+                return null;
             }
-            return firstPeel;
+            List<Object> peelList = new ArrayList<>(targetCount);
+            Iterator<?> targetIterator = targetList.iterator();
+            while(targetIterator.hasNext()) {
+                Object targetItem = targetIterator.next();
+                if(Box.isPrimitive(targetItem)) {
+                    peelList.add(String.valueOf(targetItem));
+                } else {
+                    Peel aPeel = new Peel();
+                    this.peel(targetItem, aPeel);
+                    peelList.add(aPeel);
+                }
+            }
+            return peelList;
+        } else if(target instanceof Map) {
+            Map<String, Object> targetMap = (Map<String, Object>) target;
+            if(targetMap.isEmpty()) {
+                return null;
+            }
+            Peel peelMap = new Peel(targetMap.size());
+            for(Map.Entry<String, Object> entry : targetMap.entrySet()) {
+                Object targetMapValue = entry.getValue();
+                if(Box.isPrimitive(targetMapValue)) {
+                    peelMap.put(entry.getKey(), String.valueOf(targetMapValue));
+                } else {
+                    Peel aPeel = new Peel();
+                    this.peel(targetMapValue, aPeel);
+                    peelMap.put(entry.getKey(), aPeel);
+                }
+            }
+            return peelMap;
         } else {
             Peel peel = new Peel();
             this.peel(target, peel);
@@ -108,31 +132,32 @@ public class Knife {
                 if(targetCount == 0) {
                     continue;
                 }
-                if(Box.isPrimitive(targetList)) {
-                    peel.put(peelName, targetList);
-                } else {
-                    List<Peel> peelList = new ArrayList<>(targetCount);
-                    for(Object targetItem : targetList) {
+                List<Object> peelList = new ArrayList<>(targetCount);
+                Iterator<?> targetIterator = targetList.iterator();
+                while(targetIterator.hasNext()) {
+                    Object targetItem = targetIterator.next();
+                    if(Box.isPrimitive(targetItem)) {
+                        peelList.add(String.valueOf(targetItem));
+                    } else {
                         Peel aPeel = new Peel();
                         this.peel(targetItem, aPeel);
                         peelList.add(aPeel);
                     }
-                    peel.put(peelName, peelList);
                 }
+                peel.put(peelName, peelList);
             } else if(targetFieldValue instanceof Map) {
-                Map<String, Object> targetFieldMap = (Map<String, Object>) targetFieldValue;
-                if(targetFieldMap.isEmpty()) {
+                Map<String, Object> targetMap = (Map<String, Object>) targetFieldValue;
+                if(targetMap.isEmpty()) {
                     continue;
                 }
-                Peel peelMap = new Peel(targetFieldMap.size());
-                for(Map.Entry<String, Object> entry : targetFieldMap.entrySet()) {
-                    Object targetFieldMapValue = entry.getValue();
-                    if(Box.isPrimitive(targetFieldMapValue)) {
-                        // TODO 为啥转成String
-                        peelMap.put(entry.getKey(), String.valueOf(targetFieldMapValue));
+                Peel peelMap = new Peel(targetMap.size());
+                for(Map.Entry<String, Object> entry : targetMap.entrySet()) {
+                    Object targetMapValue = entry.getValue();
+                    if(Box.isPrimitive(targetMapValue)) {
+                        peelMap.put(entry.getKey(), String.valueOf(targetMapValue));
                     } else {
                         Peel aPeel = new Peel();
-                        this.peel(targetFieldMapValue, aPeel);
+                        this.peel(targetMapValue, aPeel);
                         peelMap.put(entry.getKey(), aPeel);
                     }
                 }

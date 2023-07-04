@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cut {
     /**
-     * 标签
+     * 标签（如果未指定，则默认为属性名称）
      * @return
      */
     String tag() default "";
