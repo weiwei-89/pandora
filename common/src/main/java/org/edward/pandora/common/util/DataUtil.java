@@ -45,60 +45,60 @@ public class DataUtil {
         return hexArray;
     }
 
-    public static String toAscii(byte b) {
+    public static String toAsciiString(byte b) {
         char c = (char) b;
         return String.valueOf(c);
     }
 
-    public static String toAscii(byte[] bytes) {
+    public static String toAsciiString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<bytes.length; i++) {
-            sb.append(toAscii(bytes[i]));
+            sb.append(toAsciiString(bytes[i]));
         }
         return sb.toString();
     }
 
-    public static String[] toAsciiArray(byte[] bytes) {
+    public static String[] toAsciiStringArray(byte[] bytes) {
         String[] hexArray = new String[bytes.length];
         for(int i=0; i<bytes.length; i++) {
-            hexArray[i] = toAscii(bytes[i]);
+            hexArray[i] = toAsciiString(bytes[i]);
         }
         return hexArray;
     }
 
-    public static int toNumber(byte b) {
+    public static int toInt(byte b) {
         return b&0xFF;
     }
 
-    public static int toNumberForBigEndian(byte[] bytes) throws Exception {
+    public static int toIntForBigEndian(byte[] bytes) throws Exception {
         if(bytes==null || bytes.length==0) {
             throw new Exception("there are no any bytes");
         }
-        if(bytes.length > 4) {
-            throw new Exception("the count of bytes must be less than or equal to 4");
+        if(bytes.length != 4) {
+            throw new Exception("the count of bytes must be 4");
         }
         int total = 0;
         for(int b=bytes.length-1; b>=0; b--) {
-            total += (bytes[b]&0xFF)<<(b*8);
+            total |= (bytes[b]&0xFF)<<(b*8);
         }
         return total;
     }
 
-    public static int toNumberForLittleEndian(byte[] bytes) throws Exception {
+    public static int toIntForLittleEndian(byte[] bytes) throws Exception {
         if(bytes==null || bytes.length==0) {
             throw new Exception("there are no any bytes");
         }
-        if(bytes.length > 4) {
-            throw new Exception("the count of bytes must be less than or equal to 4");
+        if(bytes.length != 4) {
+            throw new Exception("the count of bytes must be 4");
         }
         int total = 0;
         for(int b=0; b<bytes.length; b++) {
-            total += (bytes[b]&0xFF)<<(b*8);
+            total |= (bytes[b]&0xFF)<<(b*8);
         }
         return total;
     }
 
-    public static byte[] toBytesForBigEndian(int number) {
+    public static byte[] intToBytesForBigEndian(int number) {
         byte[] bytes = new byte[4];
         bytes[3] = (byte) (number&0xFF);
         bytes[2] = (byte) ((number>>8)&0xFF);
@@ -107,12 +107,164 @@ public class DataUtil {
         return bytes;
     }
 
-    public static byte[] toBytesForLittleEndian(int number) {
+    public static byte[] intToBytesForLittleEndian(int number) {
         byte[] bytes = new byte[4];
         bytes[0] = (byte) (number&0xFF);
         bytes[1] = (byte) ((number>>8)&0xFF);
         bytes[2] = (byte) ((number>>16)&0xFF);
         bytes[3] = (byte) ((number>>24)&0xFF);
+        return bytes;
+    }
+
+    public static short toShortForBigEndian(byte[] bytes) throws Exception {
+        if(bytes==null || bytes.length==0) {
+            throw new Exception("there are no any bytes");
+        }
+        if(bytes.length != 2) {
+            throw new Exception("the count of bytes must be 2");
+        }
+        short total = 0;
+        for(int b=bytes.length-1; b>=0; b--) {
+            total |= (bytes[b]&0xFF)<<(b*8);
+        }
+        return total;
+    }
+
+    public static short toShortForLittleEndian(byte[] bytes) throws Exception {
+        if(bytes==null || bytes.length==0) {
+            throw new Exception("there are no any bytes");
+        }
+        if(bytes.length != 2) {
+            throw new Exception("the count of bytes must be 2");
+        }
+        short total = 0;
+        for(int b=0; b<bytes.length; b++) {
+            total |= (bytes[b]&0xFF)<<(b*8);
+        }
+        return total;
+    }
+
+    public static byte[] shortToBytesForBigEndian(short number) {
+        byte[] bytes = new byte[2];
+        bytes[1] = (byte) (number&0xFF);
+        bytes[0] = (byte) ((number>>8)&0xFF);
+        return bytes;
+    }
+
+    public static byte[] shortToBytesForLittleEndian(short number) {
+        byte[] bytes = new byte[2];
+        bytes[0] = (byte) (number&0xFF);
+        bytes[1] = (byte) ((number>>8)&0xFF);
+        return bytes;
+    }
+
+    public static long toLongForBigEndian(byte[] bytes) throws Exception {
+        if(bytes==null || bytes.length==0) {
+            throw new Exception("there are no any bytes");
+        }
+        if(bytes.length != 8) {
+            throw new Exception("the count of bytes must be 8");
+        }
+        long total = 0;
+        for(int b=bytes.length-1; b>=0; b--) {
+            total |= ((long)(bytes[b]&0xFF))<<(b*8);
+        }
+        return total;
+    }
+
+    public static long toLongForLittleEndian(byte[] bytes) throws Exception {
+        if(bytes==null || bytes.length==0) {
+            throw new Exception("there are no any bytes");
+        }
+        if(bytes.length != 8) {
+            throw new Exception("the count of bytes must be 8");
+        }
+        long total = 0;
+        for(int b=0; b<bytes.length; b++) {
+            total |= ((long)(bytes[b]&0xFF))<<(b*8);
+        }
+        return total;
+    }
+
+    public static byte[] longToBytesForBigEndian(long number) {
+        byte[] bytes = new byte[8];
+        bytes[7] = (byte) (number&0xFF);
+        bytes[6] = (byte) ((number>>8)&0xFF);
+        bytes[5] = (byte) ((number>>16)&0xFF);
+        bytes[4] = (byte) ((number>>24)&0xFF);
+        bytes[3] = (byte) ((number>>32)&0xFF);
+        bytes[2] = (byte) ((number>>40)&0xFF);
+        bytes[1] = (byte) ((number>>48)&0xFF);
+        bytes[0] = (byte) ((number>>56)&0xFF);
+        return bytes;
+    }
+
+    public static byte[] longToBytesForLittleEndian(long number) {
+        byte[] bytes = new byte[8];
+        bytes[0] = (byte) (number&0xFF);
+        bytes[1] = (byte) ((number>>8)&0xFF);
+        bytes[2] = (byte) ((number>>16)&0xFF);
+        bytes[3] = (byte) ((number>>24)&0xFF);
+        bytes[4] = (byte) ((number>>32)&0xFF);
+        bytes[5] = (byte) ((number>>40)&0xFF);
+        bytes[6] = (byte) ((number>>48)&0xFF);
+        bytes[7] = (byte) ((number>>56)&0xFF);
+        return bytes;
+    }
+
+    public static double toDoubleForBigEndian(byte[] bytes) throws Exception {
+        if(bytes==null || bytes.length==0) {
+            throw new Exception("there are no any bytes");
+        }
+        if(bytes.length != 8) {
+            throw new Exception("the count of bytes must be 8");
+        }
+        long total = 0;
+        for(int b=bytes.length-1; b>=0; b--) {
+            total |= ((long)(bytes[b]&0xFF))<<(b*8);
+        }
+        return Double.longBitsToDouble(total);
+    }
+
+    public static double toDoubleForLittleEndian(byte[] bytes) throws Exception {
+        if(bytes==null || bytes.length==0) {
+            throw new Exception("there are no any bytes");
+        }
+        if(bytes.length != 8) {
+            throw new Exception("the count of bytes must be 8");
+        }
+        long total = 0;
+        for(int b=0; b<bytes.length; b++) {
+            total |= ((long)(bytes[b]&0xFF))<<(b*8);
+        }
+        return Double.longBitsToDouble(total);
+    }
+
+    public static byte[] doubleToBytesForBigEndian(double number) {
+        long longValue = Double.doubleToRawLongBits(number);
+        byte[] bytes = new byte[8];
+        bytes[7] = (byte) (longValue&0xFF);
+        bytes[6] = (byte) ((longValue>>8)&0xFF);
+        bytes[5] = (byte) ((longValue>>16)&0xFF);
+        bytes[4] = (byte) ((longValue>>24)&0xFF);
+        bytes[3] = (byte) ((longValue>>32)&0xFF);
+        bytes[2] = (byte) ((longValue>>40)&0xFF);
+        bytes[1] = (byte) ((longValue>>48)&0xFF);
+        bytes[0] = (byte) ((longValue>>56)&0xFF);
+        return bytes;
+    }
+
+    public static byte[] doubleToBytesForLittleEndian(double number) {
+        long longValue = Double.doubleToRawLongBits(number);
+        byte[] bytes = new byte[8];
+        bytes[0] = (byte) (longValue&0xFF);
+        bytes[1] = (byte) ((longValue>>8)&0xFF);
+        bytes[2] = (byte) ((longValue>>16)&0xFF);
+        bytes[3] = (byte) ((longValue>>24)&0xFF);
+        bytes[4] = (byte) ((longValue>>32)&0xFF);
+        bytes[5] = (byte) ((longValue>>40)&0xFF);
+        bytes[6] = (byte) ((longValue>>48)&0xFF);
+        bytes[7] = (byte) ((longValue>>56)&0xFF);
         return bytes;
     }
 }

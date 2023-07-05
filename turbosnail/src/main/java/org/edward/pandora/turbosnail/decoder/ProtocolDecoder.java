@@ -74,13 +74,13 @@ public class ProtocolDecoder {
         } else if(decodeType == Decode.Type.HEX) {
             info.put(segment.getId(), DataUtil.toHexString(partBytes));
         } else if(decodeType == Decode.Type.ASCII) {
-            info.put(segment.getId(), DataUtil.toAscii(partBytes));
-        } else if(decodeType == Decode.Type.NUMBER) {
-            info.put(segment.getId(), DataUtil.toNumberForLittleEndian(partBytes));
-        } else if(decodeType == Decode.Type.NUMBER_BE) {
-            info.put(segment.getId(), DataUtil.toNumberForBigEndian(partBytes));
-        } else if(decodeType == Decode.Type.NUMBER_LE) {
-            info.put(segment.getId(), DataUtil.toNumberForLittleEndian(partBytes));
+            info.put(segment.getId(), DataUtil.toAsciiString(partBytes));
+        } else if(decodeType == Decode.Type.INT) {
+            info.put(segment.getId(), DataUtil.toIntForLittleEndian(partBytes));
+        } else if(decodeType == Decode.Type.INT_BE) {
+            info.put(segment.getId(), DataUtil.toIntForBigEndian(partBytes));
+        } else if(decodeType == Decode.Type.INT_LE) {
+            info.put(segment.getId(), DataUtil.toIntForLittleEndian(partBytes));
         } else if(decodeType == Decode.Type.OPTION) {
             List<Option> optionList = decode.getOptionList();
             if(optionList==null || optionList.size()==0) {
