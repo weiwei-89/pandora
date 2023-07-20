@@ -6,6 +6,7 @@ public class Decode extends Element {
     private Type type;
     private String protocolId;
     private String foreignProtocolId;
+    private Options options;
     private List<Option> optionList;
 
     public Type getType() {
@@ -25,6 +26,12 @@ public class Decode extends Element {
     }
     public void setForeignProtocolId(String foreignProtocolId) {
         this.foreignProtocolId = foreignProtocolId;
+    }
+    public Options getOptions() {
+        return options;
+    }
+    public void setOptions(Options options) {
+        this.options = options;
     }
     public List<Option> getOptionList() {
         return this.optionList;

@@ -21,6 +21,8 @@ public class ProtocolXmlHandler extends DefaultHandler {
 
     private Decode currentDecode;
 
+    private Options currentOptions;
+
     private List<Option> currentOptionList;
 
     private Option currentOption;
@@ -47,9 +49,6 @@ public class ProtocolXmlHandler extends DefaultHandler {
         } else if("segment".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading segment element[id:{}]......", id);
-            if(this.protocol == null) {
-                throw new SAXException("there's not a protocol element as its parent element");
-            }
             this.currentSegment = new Segment();
             this.currentSegment.setId(id);
             this.currentSegment.setName(attributes.getValue("name"));
@@ -59,9 +58,6 @@ public class ProtocolXmlHandler extends DefaultHandler {
         } else if("position".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading position element[id:{}]......", id);
-            if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent element");
-            }
             this.currentPosition = new Position();
             this.currentPosition.setId(id);
             this.currentPosition.setName(attributes.getValue("name"));
@@ -73,9 +69,6 @@ public class ProtocolXmlHandler extends DefaultHandler {
         } else if("decode".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading decode element[id:{}]......", id);
-            if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent element");
-            }
             this.currentDecode = new Decode();
             this.currentDecode.setId(id);
             this.currentDecode.setName(attributes.getValue("name"));
@@ -84,17 +77,16 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentDecode.setProtocolId(attributes.getValue("protocolId"));
             this.currentDecode.setForeignProtocolId(attributes.getValue("foreignProtocolId"));
         } else if("options".equalsIgnoreCase(qName)) {
-            logger.info("reading options element......");
-            if(this.currentDecode == null) {
-                throw new SAXException("there's not a decode element as its parent element");
-            }
-            this.currentOptionList = new ArrayList<>();
+            String id = attributes.getValue("id");
+            logger.info("reading options element[id:{}]......", id);
+            this.currentOptions = new Options();
+            this.currentOptions.setId(id);
+            this.currentOptions.setName(attributes.getValue("name"));
+            this.currentOptions.setDescription(attributes.getValue("description"));
+            this.currentOptions.setType(Decode.Type.get(attributes.getValue("type")));
         } else if("option".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading option element[id:{}]......", id);
-            if(this.currentOptionList == null) {
-                throw new SAXException("there's not an options element as its parent element");
-            }
             this.currentOption = new Option();
             this.currentOption.setId(id);
             this.currentOption.setName(attributes.getValue("name"));
@@ -113,17 +105,34 @@ public class ProtocolXmlHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if("segment".equalsIgnoreCase(qName)) {
-            if(this.protocol.getSegmentList()==null || this.protocol.getSegmentList().size()==0) {
+            if(this.protocol == null) {
+                throw new SAXException("there's not a protocol element as its parent");
+            }
+            if(this.protocol.getSegmentList() == null) {
                 this.protocol.setSegmentList(new ArrayList<>());
             }
             this.protocol.getSegmentList().add(this.currentSegment);
         } else if("position".equalsIgnoreCase(qName)) {
+            if(this.currentSegment == null) {
+                throw new SAXException("there's not a segment element as its parent");
+            }
             this.currentSegment.setPosition(this.currentPosition);
         } else if("decode".equalsIgnoreCase(qName)) {
+            if(this.currentSegment == null) {
+                throw new SAXException("there's not a segment element as its parent");
+            }
             this.currentSegment.setDecode(this.currentDecode);
         } else if("options".equalsIgnoreCase(qName)) {
+            if(this.currentDecode == null) {
+                throw new SAXException("there's not a decode element as its parent");
+            }
+            this.currentDecode.setOptions(this.currentOptions);
+            this.currentOptionList = new ArrayList<>();
             this.currentDecode.setOptionList(this.currentOptionList);
         } else if("option".equalsIgnoreCase(qName)) {
+            if(this.currentOptionList == null) {
+                throw new SAXException("there's not an options element as its parent");
+            }
             this.currentOptionList.add(this.currentOption);
         }
         logger.info("done");

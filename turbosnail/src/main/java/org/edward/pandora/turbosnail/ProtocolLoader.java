@@ -14,8 +14,9 @@ import java.util.Map;
 
 public class ProtocolLoader {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolLoader.class);
+    private static final String FORMAT = "xml";
 
-    public static synchronized Map<String, Papers> load(Path[] pathArray) throws Exception {
+    public static Map<String, Papers> load(Path[] pathArray) throws Exception {
         if(pathArray==null || pathArray.length==0) {
             throw new Exception("path is not specified");
         }
@@ -27,6 +28,7 @@ public class ProtocolLoader {
                 logger.info("done");
             } catch(Exception e) {
                 logger.error("reading protocol goes wrong", e);
+                e.printStackTrace();
             }
         }
         return papersMap;
@@ -35,16 +37,16 @@ public class ProtocolLoader {
     private static Papers load(String path) throws Exception {
         File pathFile = new File(path);
         if(!pathFile.isDirectory()) {
-            throw new Exception("\""+path+"\" is not a folder");
+            throw new Exception("\""+path+"\" is not a path");
         }
         File[] protocolFileArray = pathFile.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.endsWith(".xml");
+                return name.endsWith("."+FORMAT);
             }
         });
         if(protocolFileArray==null || protocolFileArray.length==0) {
-            throw new Exception("there are no any protocol files in \""+path+"\"");
+            throw new Exception("there are no any protocol files in path \""+path+"\"");
         }
         Papers papers = new Papers(protocolFileArray.length);
         for(int f=0; f<protocolFileArray.length; f++) {

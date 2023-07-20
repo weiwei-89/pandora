@@ -9,6 +9,13 @@ public class Data {
         this.capacity = bytes.length;
     }
 
+    public byte[] getBytes() {
+        return bytes;
+    }
+    public int getCapacity() {
+        return capacity;
+    }
+
     private int readerIndex;
 
     public int getReaderIndex() {

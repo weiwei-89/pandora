@@ -22,7 +22,7 @@ public class ProtocolDecoder {
     }
 
     public Info decode(byte[] bytes) throws Exception {
-        logger.info("decoding[protocol_id:{}]......", this.protocolId);
+        logger.info("decoding protocol[protocol_id:{}]......", this.protocolId);
         Info info = new Info();
         this.decode(new Data(bytes), this.papers.get(this.protocolId), info);
         logger.info("done");
@@ -82,9 +82,16 @@ public class ProtocolDecoder {
         } else if(decodeType == Decode.Type.INT_LE) {
             info.put(segment.getId(), DataUtil.toIntForLittleEndian(partBytes));
         } else if(decodeType == Decode.Type.OPTION) {
+            Options options = decode.getOptions();
+            if(options == null) {
+                throw new Exception("there's not an options element");
+            }
             List<Option> optionList = decode.getOptionList();
             if(optionList==null || optionList.size()==0) {
-                throw new Exception("there is no any options");
+                throw new Exception("there are no any option elements");
+            }
+            for(int i=0; i<optionList.size(); i++) {
+                Option option = optionList.get(i);
             }
         }
     }
