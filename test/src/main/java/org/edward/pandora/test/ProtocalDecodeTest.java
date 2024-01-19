@@ -1,5 +1,6 @@
 package org.edward.pandora.test;
 
+import com.alibaba.fastjson2.JSON;
 import org.edward.pandora.common.util.DataUtil;
 import org.edward.pandora.onion.Knife;
 import org.edward.pandora.turbosnail.Papers;
@@ -33,6 +34,6 @@ public class ProtocalDecodeTest {
         Info info = decoder.decode(DataUtil.hexToBytes(sb.toString()));
         Knife knife = Knife.build();
         Object result = knife.peel(info);
-        System.out.println("result = " + result.toString());
+        System.out.println("result = " + JSON.toJSONString(result));
     }
 }
