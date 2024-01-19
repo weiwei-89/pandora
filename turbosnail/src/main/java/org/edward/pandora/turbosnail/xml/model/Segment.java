@@ -1,17 +1,14 @@
 package org.edward.pandora.turbosnail.xml.model;
 
+import java.util.List;
+
 public class Segment extends Element {
-    private String value;
     private Position position;
     private Decode decode;
+    private Options options;
+    private List<Option> optionList;
     private boolean skip = false;
 
-    public String getValue() {
-        return this.value;
-    }
-    public void setValue(String value) {
-        this.value = value;
-    }
     public Position getPosition() {
         return this.position;
     }
@@ -23,6 +20,18 @@ public class Segment extends Element {
     }
     public void setDecode(Decode decode) {
         this.decode = decode;
+    }
+    public Options getOptions() {
+        return options;
+    }
+    public void setOptions(Options options) {
+        this.options = options;
+    }
+    public List<Option> getOptionList() {
+        return this.optionList;
+    }
+    public void setOptionList(List<Option> optionList) {
+        this.optionList = optionList;
     }
     public boolean isSkip() {
         return this.skip;

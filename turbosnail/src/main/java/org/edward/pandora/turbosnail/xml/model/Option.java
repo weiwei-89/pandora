@@ -1,12 +1,19 @@
 package org.edward.pandora.turbosnail.xml.model;
 
 public class Option extends Element {
+    private String code;
     private String value;
     private boolean range;
     private int min;
     private int max;
     private String unit;
 
+    public String getCode() {
+        return code;
+    }
+    public void setCode(String code) {
+        this.code = code;
+    }
     public String getValue() {
         return this.value;
     }

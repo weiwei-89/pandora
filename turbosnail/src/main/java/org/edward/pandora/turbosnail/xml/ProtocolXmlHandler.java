@@ -13,23 +13,21 @@ import java.util.List;
 public class ProtocolXmlHandler extends DefaultHandler {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolXmlHandler.class);
 
-    private Protocol protocol;
+    private final Protocol protocol;
 
-    private Segment currentSegment;
-
-    private Position currentPosition;
-
-    private Decode currentDecode;
-
-    private Options currentOptions;
-
-    private List<Option> currentOptionList;
-
-    private Option currentOption;
+    public ProtocolXmlHandler() {
+        this.protocol = new Protocol();
+    }
 
     public Protocol getProtocol() {
         return this.protocol;
     }
+
+    private Segment currentSegment;
+    private Position currentPosition;
+    private Decode currentDecode;
+    private Options currentOptions;
+    private Option currentOption;
 
     @Override
     public void startDocument() throws SAXException {
@@ -42,10 +40,10 @@ public class ProtocolXmlHandler extends DefaultHandler {
         if("protocol".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading protocol element[id:{}]......", id);
-            this.protocol = new Protocol();
             this.protocol.setId(id);
             this.protocol.setName(attributes.getValue("name"));
             this.protocol.setDescription(attributes.getValue("description"));
+            this.protocol.setSegmentList(new ArrayList<>());
         } else if("segment".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading segment element[id:{}]......", id);
@@ -53,7 +51,6 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentSegment.setId(id);
             this.currentSegment.setName(attributes.getValue("name"));
             this.currentSegment.setDescription(attributes.getValue("description"));
-            this.currentSegment.setValue(attributes.getValue("value"));
             this.currentSegment.setSkip(Boolean.parseBoolean(attributes.getValue("skip")));
         } else if("position".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
@@ -74,8 +71,9 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentDecode.setName(attributes.getValue("name"));
             this.currentDecode.setDescription(attributes.getValue("description"));
             this.currentDecode.setType(Decode.Type.get(attributes.getValue("type")));
-            this.currentDecode.setProtocolId(attributes.getValue("protocolId"));
-            this.currentDecode.setForeignProtocolId(attributes.getValue("foreignProtocolId"));
+            this.currentDecode.setValue(attributes.getValue("value"));
+            this.currentDecode.setOption(Boolean.parseBoolean(attributes.getValue("option")));
+            this.currentDecode.setProtocol(Boolean.parseBoolean(attributes.getValue("protocol")));
         } else if("options".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading options element[id:{}]......", id);
@@ -83,7 +81,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentOptions.setId(id);
             this.currentOptions.setName(attributes.getValue("name"));
             this.currentOptions.setDescription(attributes.getValue("description"));
-            this.currentOptions.setType(Decode.Type.get(attributes.getValue("type")));
+            this.currentSegment.setOptionList(new ArrayList<>());
         } else if("option".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading option element[id:{}]......", id);
@@ -91,6 +89,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentOption.setId(id);
             this.currentOption.setName(attributes.getValue("name"));
             this.currentOption.setDescription(attributes.getValue("description"));
+            this.currentOption.setCode(attributes.getValue("code"));
             this.currentOption.setValue(attributes.getValue("value"));
             boolean range = Boolean.parseBoolean(attributes.getValue("range"));
             this.currentOption.setRange(range);
@@ -106,34 +105,29 @@ public class ProtocolXmlHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if("segment".equalsIgnoreCase(qName)) {
             if(this.protocol == null) {
-                throw new SAXException("there's not a protocol element as its parent");
-            }
-            if(this.protocol.getSegmentList() == null) {
-                this.protocol.setSegmentList(new ArrayList<>());
+                throw new SAXException("there's not a protocol element as its parent[segment:"+qName+"]");
             }
             this.protocol.getSegmentList().add(this.currentSegment);
         } else if("position".equalsIgnoreCase(qName)) {
             if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent");
+                throw new SAXException("there's not a segment element as its parent[position:"+qName+"]");
             }
             this.currentSegment.setPosition(this.currentPosition);
         } else if("decode".equalsIgnoreCase(qName)) {
             if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent");
+                throw new SAXException("there's not a segment element as its parent[decode:"+qName+"]");
             }
             this.currentSegment.setDecode(this.currentDecode);
         } else if("options".equalsIgnoreCase(qName)) {
-            if(this.currentDecode == null) {
-                throw new SAXException("there's not a decode element as its parent");
+            if(this.currentSegment == null) {
+                throw new SAXException("there's not a segment element as its parent[options:"+qName+"]");
             }
-            this.currentDecode.setOptions(this.currentOptions);
-            this.currentOptionList = new ArrayList<>();
-            this.currentDecode.setOptionList(this.currentOptionList);
+            this.currentSegment.setOptions(this.currentOptions);
         } else if("option".equalsIgnoreCase(qName)) {
-            if(this.currentOptionList == null) {
-                throw new SAXException("there's not an options element as its parent");
+            if(this.currentSegment.getOptionList() == null) {
+                throw new SAXException("there's not an options element as its parent[option:"+qName+"]");
             }
-            this.currentOptionList.add(this.currentOption);
+            this.currentSegment.getOptionList().add(this.currentOption);
         }
         logger.info("done");
     }

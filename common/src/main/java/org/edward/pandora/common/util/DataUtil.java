@@ -79,7 +79,8 @@ public class DataUtil {
         }
         int total = 0;
         for(int b=bytes.length-1; b>=0; b--) {
-            total |= (bytes[b]&0xFF)<<(b*8);
+            int offset = (bytes.length-1-b)*8;
+            total |= (bytes[b]&0xFF)<<offset;
         }
         return total;
     }
@@ -125,7 +126,8 @@ public class DataUtil {
         }
         short total = 0;
         for(int b=bytes.length-1; b>=0; b--) {
-            total |= (bytes[b]&0xFF)<<(b*8);
+            int offset = (bytes.length-1-b)*8;
+            total |= (bytes[b]&0xFF)<<offset;
         }
         return total;
     }
@@ -167,7 +169,8 @@ public class DataUtil {
         }
         long total = 0;
         for(int b=bytes.length-1; b>=0; b--) {
-            total |= ((long)(bytes[b]&0xFF))<<(b*8);
+            int offset = (bytes.length-1-b)*8;
+            total |= ((long)(bytes[b]&0xFF))<<offset;
         }
         return total;
     }
@@ -221,7 +224,8 @@ public class DataUtil {
         }
         long total = 0;
         for(int b=bytes.length-1; b>=0; b--) {
-            total |= ((long)(bytes[b]&0xFF))<<(b*8);
+            int offset = (bytes.length-1-b)*8;
+            total |= ((long)(bytes[b]&0xFF))<<offset;
         }
         return Double.longBitsToDouble(total);
     }
@@ -265,6 +269,21 @@ public class DataUtil {
         bytes[5] = (byte) ((longValue>>40)&0xFF);
         bytes[6] = (byte) ((longValue>>48)&0xFF);
         bytes[7] = (byte) ((longValue>>56)&0xFF);
+        return bytes;
+    }
+
+    public static byte hexToByte(char c) {
+        return (byte) "0123456789ABCDEF".indexOf(String.valueOf(c).toUpperCase());
+    }
+
+    public static byte[] hexToBytes(String hex) {
+        int length = hex.length() / 2;
+        byte[] bytes = new byte[length];
+        char[] chars = hex.toCharArray();
+        for(int i=0; i<length; i++) {
+            int position = i * 2;
+            bytes[i] = (byte) ((hexToByte(chars[position])<<4)|(hexToByte(chars[position+1])));
+        }
         return bytes;
     }
 }

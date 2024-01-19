@@ -41,14 +41,17 @@ public class ProtocolDecoder {
 
     private void decode(Data data, Segment segment, Info info) throws Exception {
         logger.info("decoding segment[segment_id:{}]......", segment.getId());
-        Decode.Type decodeType = Decode.Type.HEX;
         Decode decode = segment.getDecode();
-        if(decode != null) {
-            decodeType = decode.getType();
+        if(decode == null) {
+            throw new Exception("there's not a decode element");
         }
-        if(decodeType == Decode.Type.PROTOCOL) {
+        if(decode.isProtocol()) {
+            Protocol protocol = this.papers.get(decode.getValue());
+            if(protocol == null) {
+                throw new Exception("protocol \""+decode.getValue()+"\" doesn't exist");
+            }
             Info infoForProtocol = new Info();
-            this.decode(data, this.papers.get(decode.getProtocolId()), infoForProtocol);
+            this.decode(data, protocol, infoForProtocol);
             info.put(segment.getId(), infoForProtocol);
             return;
         }
@@ -64,35 +67,63 @@ public class ProtocolDecoder {
             return;
         }
         byte[] partBytes = data.read(position.getLength());
-        // TODO 不要使用这么多的if-else，搞个接口或者设计模式重构一下
-        if(decodeType == Decode.Type.EQUATION) {
-            String hexValue = DataUtil.toHexString(partBytes);
-            if(!hexValue.equalsIgnoreCase(segment.getValue())) {
-                throw new Exception("\"value\" is not equal to \""+segment.getValue()+"\"");
-            }
-            info.put(segment.getId(), hexValue);
-        } else if(decodeType == Decode.Type.HEX) {
-            info.put(segment.getId(), DataUtil.toHexString(partBytes));
-        } else if(decodeType == Decode.Type.ASCII) {
-            info.put(segment.getId(), DataUtil.toAsciiString(partBytes));
-        } else if(decodeType == Decode.Type.INT) {
-            info.put(segment.getId(), DataUtil.toIntForLittleEndian(partBytes));
-        } else if(decodeType == Decode.Type.INT_BE) {
-            info.put(segment.getId(), DataUtil.toIntForBigEndian(partBytes));
-        } else if(decodeType == Decode.Type.INT_LE) {
-            info.put(segment.getId(), DataUtil.toIntForLittleEndian(partBytes));
-        } else if(decodeType == Decode.Type.OPTION) {
-            Options options = decode.getOptions();
+        String value = decode(partBytes, decode);
+        if(decode.isOption()) {
+            Options options = segment.getOptions();
             if(options == null) {
                 throw new Exception("there's not an options element");
             }
-            List<Option> optionList = decode.getOptionList();
+            List<Option> optionList = segment.getOptionList();
             if(optionList==null || optionList.size()==0) {
                 throw new Exception("there are no any option elements");
             }
             for(int i=0; i<optionList.size(); i++) {
                 Option option = optionList.get(i);
+                if(value.equals(option.getCode())) {
+                    value = option.getValue();
+                }
             }
         }
+        info.put(segment.getId(), value);
+    }
+
+    private String decode(byte[] bytes, Decode decode) throws Exception {
+        Decode.Type decodeType = decode.getType();
+        if(decodeType == Decode.Type.EQUATION) {
+            String hexValue = DataUtil.toHexString(bytes);
+            if(!hexValue.equalsIgnoreCase(decode.getValue())) {
+                throw new Exception("\"value\" is not equal to \""+decode.getValue()+"\"");
+            }
+            return hexValue;
+        } else if(decodeType == Decode.Type.HEX) {
+            return DataUtil.toHexString(bytes);
+        } else if(decodeType == Decode.Type.ASCII) {
+            return DataUtil.toAsciiString(bytes);
+        } else if(decodeType == Decode.Type.INT) {
+            return String.valueOf(DataUtil.toIntForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.INT_BE) {
+            return String.valueOf(DataUtil.toIntForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.INT_LE) {
+            return String.valueOf(DataUtil.toIntForLittleEndian(bytes));
+        } else if(decodeType == Decode.Type.SHORT) {
+            return String.valueOf(DataUtil.toShortForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.SHORT_BE) {
+            return String.valueOf(DataUtil.toShortForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.SHORT_LE) {
+            return String.valueOf(DataUtil.toShortForLittleEndian(bytes));
+        } else if(decodeType == Decode.Type.LONG) {
+            return String.valueOf(DataUtil.toLongForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.LONG_BE) {
+            return String.valueOf(DataUtil.toLongForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.LONG_LE) {
+            return String.valueOf(DataUtil.toLongForLittleEndian(bytes));
+        } else if(decodeType == Decode.Type.DOUBLE) {
+            return String.valueOf(DataUtil.toDoubleForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.DOUBLE_BE) {
+            return String.valueOf(DataUtil.toDoubleForBigEndian(bytes));
+        } else if(decodeType == Decode.Type.DOUBLE_LE) {
+            return String.valueOf(DataUtil.toDoubleForLittleEndian(bytes));
+        }
+        throw new Exception("decode type is unsupported");
     }
 }

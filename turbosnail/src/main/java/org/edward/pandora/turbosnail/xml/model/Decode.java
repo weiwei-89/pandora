@@ -1,13 +1,10 @@
 package org.edward.pandora.turbosnail.xml.model;
 
-import java.util.List;
-
 public class Decode extends Element {
     private Type type;
-    private String protocolId;
-    private String foreignProtocolId;
-    private Options options;
-    private List<Option> optionList;
+    private String value;
+    private boolean option = false;
+    private boolean protocol = false;
 
     public Type getType() {
         return this.type;
@@ -15,29 +12,23 @@ public class Decode extends Element {
     public void setType(Type type) {
         this.type = type;
     }
-    public String getProtocolId() {
-        return this.protocolId;
+    public String getValue() {
+        return this.value;
     }
-    public void setProtocolId(String protocolId) {
-        this.protocolId = protocolId;
+    public void setValue(String value) {
+        this.value = value;
     }
-    public String getForeignProtocolId() {
-        return this.foreignProtocolId;
+    public boolean isOption() {
+        return option;
     }
-    public void setForeignProtocolId(String foreignProtocolId) {
-        this.foreignProtocolId = foreignProtocolId;
+    public void setOption(boolean option) {
+        this.option = option;
     }
-    public Options getOptions() {
-        return options;
+    public boolean isProtocol() {
+        return protocol;
     }
-    public void setOptions(Options options) {
-        this.options = options;
-    }
-    public List<Option> getOptionList() {
-        return this.optionList;
-    }
-    public void setOptionList(List<Option> optionList) {
-        this.optionList = optionList;
+    public void setProtocol(boolean protocol) {
+        this.protocol = protocol;
     }
 
     public enum Type {
@@ -55,9 +46,7 @@ public class Decode extends Element {
         LONG_LE,
         DOUBLE,
         DOUBLE_BE,
-        DOUBLE_LE,
-        OPTION,
-        PROTOCOL;
+        DOUBLE_LE;
 
         public static Type get(String type) {
             for(Type t : Type.values()) {

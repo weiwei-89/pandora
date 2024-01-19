@@ -14,9 +14,24 @@ import java.util.Map;
 
 public class ProtocolLoader {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolLoader.class);
-    private static final String FORMAT = "xml";
+    private static final String DEFAULT_FORMAT = "xml";
 
-    public static Map<String, Papers> load(Path[] pathArray) throws Exception {
+    private ProtocolLoader() {
+
+    }
+
+    public static ProtocolLoader build() {
+        return new ProtocolLoader();
+    }
+
+    private String format = DEFAULT_FORMAT;
+
+    public ProtocolLoader setFormat(String format) {
+        this.format = format;
+        return this;
+    }
+
+    public Map<String, Papers> load(Path[] pathArray) throws Exception {
         if(pathArray==null || pathArray.length==0) {
             throw new Exception("path is not specified");
         }
@@ -34,7 +49,7 @@ public class ProtocolLoader {
         return papersMap;
     }
 
-    private static Papers load(String path) throws Exception {
+    private Papers load(String path) throws Exception {
         File pathFile = new File(path);
         if(!pathFile.isDirectory()) {
             throw new Exception("\""+path+"\" is not a path");
@@ -42,7 +57,7 @@ public class ProtocolLoader {
         File[] protocolFileArray = pathFile.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.endsWith("."+FORMAT);
+                return name.endsWith("."+format);
             }
         });
         if(protocolFileArray==null || protocolFileArray.length==0) {
