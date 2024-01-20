@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: bee
+  profiles:
+    active: ${commonEnv},${beeEnv}
