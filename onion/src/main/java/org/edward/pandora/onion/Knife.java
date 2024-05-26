@@ -24,54 +24,56 @@ public class Knife {
         if(target == null) {
             return null;
         }
-        if(target instanceof Iterable) {
-            Iterable<?> targetList = (Iterable<?>) target;
-            int targetCount = Box.getListCount(targetList);
-            if(targetCount == 0) {
-                return null;
-            }
-            List<Object> peelList = new ArrayList<>(targetCount);
-            Iterator<?> targetIterator = targetList.iterator();
-            while(targetIterator.hasNext()) {
-                Object targetItem = targetIterator.next();
-                if(Box.isPrimitive(targetItem)) {
-                    peelList.add(String.valueOf(targetItem));
-                } else {
-                    Peel aPeel = new Peel();
-                    this.peel(targetItem, aPeel);
-                    peelList.add(aPeel);
-                }
-            }
-            return peelList;
-        } else if(target instanceof Map) {
-            Map<String, Object> targetMap = (Map<String, Object>) target;
-            if(targetMap.isEmpty()) {
-                return null;
-            }
-            Peel peelMap = new Peel(targetMap.size());
-            for(Map.Entry<String, Object> entry : targetMap.entrySet()) {
-                Object targetMapValue = entry.getValue();
-                if(Box.isPrimitive(targetMapValue)) {
-                    peelMap.put(entry.getKey(), String.valueOf(targetMapValue));
-                } else {
-                    Peel aPeel = new Peel();
-                    this.peel(targetMapValue, aPeel);
-                    peelMap.put(entry.getKey(), aPeel);
-                }
-            }
-            return peelMap;
+        if(Box.isPrimitive(target)) {
+            return String.valueOf(target);
         } else {
-            Peel peel = new Peel();
-            this.peel(target, peel);
-            return peel;
+            if(target instanceof Iterable) {
+                Iterable<?> targetList = (Iterable<?>) target;
+                int targetCount = Box.getListCount(targetList);
+                if(targetCount == 0) {
+                    return null;
+                }
+                List<Object> peelList = new ArrayList<>(targetCount);
+                Iterator<?> targetIterator = targetList.iterator();
+                while(targetIterator.hasNext()) {
+                    Object targetListItem = targetIterator.next();
+                    if(Box.isPrimitive(targetListItem)) {
+                        peelList.add(String.valueOf(targetListItem));
+                    } else {
+                        peelList.add(this.peel(targetListItem));
+                    }
+                }
+                return peelList;
+            } else if(target instanceof Map) {
+                Map<String, Object> targetMap = (Map<String, Object>) target;
+                if(targetMap.isEmpty()) {
+                    return null;
+                }
+                Peel peelMap = new Peel(targetMap.size());
+                for(Map.Entry<String, Object> entry : targetMap.entrySet()) {
+                    Object targetMapValue = entry.getValue();
+                    if(Box.isPrimitive(targetMapValue)) {
+                        peelMap.put(entry.getKey(), String.valueOf(targetMapValue));
+                    } else {
+                        peelMap.put(entry.getKey(), this.peel(targetMapValue));
+                    }
+                }
+                return peelMap;
+            } else {
+                return this.extract(target);
+            }
         }
     }
 
-    private void peel(Object target, Peel peel) throws Exception {
+    private Peel extract(Object target) throws Exception {
+        if(target == null) {
+            return null;
+        }
         Field[] targetFields = target.getClass().getDeclaredFields();
         if(targetFields==null || targetFields.length==0) {
-            return;
+            return null;
         }
+        Peel peel = new Peel(targetFields.length);
         for(Field targetField : targetFields) {
             if(!targetField.isAnnotationPresent(Cut.class)) {
                 continue;
@@ -126,47 +128,10 @@ public class Knife {
                         }
                     }
                 }
-            } else if(targetFieldValue instanceof Iterable) {
-                Iterable<?> targetList = (Iterable<?>) targetFieldValue;
-                int targetCount = Box.getListCount(targetList);
-                if(targetCount == 0) {
-                    continue;
-                }
-                List<Object> peelList = new ArrayList<>(targetCount);
-                Iterator<?> targetIterator = targetList.iterator();
-                while(targetIterator.hasNext()) {
-                    Object targetItem = targetIterator.next();
-                    if(Box.isPrimitive(targetItem)) {
-                        peelList.add(String.valueOf(targetItem));
-                    } else {
-                        Peel aPeel = new Peel();
-                        this.peel(targetItem, aPeel);
-                        peelList.add(aPeel);
-                    }
-                }
-                peel.put(peelName, peelList);
-            } else if(targetFieldValue instanceof Map) {
-                Map<String, Object> targetMap = (Map<String, Object>) targetFieldValue;
-                if(targetMap.isEmpty()) {
-                    continue;
-                }
-                Peel peelMap = new Peel(targetMap.size());
-                for(Map.Entry<String, Object> entry : targetMap.entrySet()) {
-                    Object targetMapValue = entry.getValue();
-                    if(Box.isPrimitive(targetMapValue)) {
-                        peelMap.put(entry.getKey(), String.valueOf(targetMapValue));
-                    } else {
-                        Peel aPeel = new Peel();
-                        this.peel(targetMapValue, aPeel);
-                        peelMap.put(entry.getKey(), aPeel);
-                    }
-                }
-                peel.put(peelName, peelMap);
             } else {
-                Peel nextPeel = new Peel();
-                this.peel(targetFieldValue, nextPeel);
-                peel.put(peelName, nextPeel);
+                peel.put(peelName, this.peel(targetFieldValue));
             }
         }
+        return peel;
     }
 }
