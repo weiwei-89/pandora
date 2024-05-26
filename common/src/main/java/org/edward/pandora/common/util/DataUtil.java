@@ -29,7 +29,7 @@ public class DataUtil {
         return sb.toString();
     }
 
-    public static String[] toHexStringArray(byte[] bytes) {
+    public static String[] toHexArray(byte[] bytes) {
         String[] hexArray = new String[bytes.length];
         for(int i=0; i<bytes.length; i++) {
             hexArray[i] = toHexString(bytes[i]);
@@ -37,7 +37,7 @@ public class DataUtil {
         return hexArray;
     }
 
-    public static String[] toHexStringArray(char[] chars) {
+    public static String[] toHexArray(char[] chars) {
         String[] hexArray = new String[chars.length];
         for(int i=0; i<chars.length; i++) {
             hexArray[i] = toHexString(chars[i]);
@@ -58,7 +58,7 @@ public class DataUtil {
         return sb.toString();
     }
 
-    public static String[] toAsciiStringArray(byte[] bytes) {
+    public static String[] toAsciiArray(byte[] bytes) {
         String[] hexArray = new String[bytes.length];
         for(int i=0; i<bytes.length; i++) {
             hexArray[i] = toAsciiString(bytes[i]);

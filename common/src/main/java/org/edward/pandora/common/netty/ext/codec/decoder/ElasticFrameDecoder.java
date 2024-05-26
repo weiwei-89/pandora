@@ -96,6 +96,6 @@ public class ElasticFrameDecoder extends ByteToMessageDecoder {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("ElasticFrameDecoder added", cause);
+        logger.error("ElasticFrameDecoder error", cause);
     }
 }
