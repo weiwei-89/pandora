@@ -1,5 +1,7 @@
 package org.edward.pandora.turbosnail.xml;
 
+import org.apache.commons.lang3.StringUtils;
+import org.edward.pandora.turbosnail.xml.model.property.Property;
 import org.edward.pandora.turbosnail.xml.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +10,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ProtocolXmlHandler extends DefaultHandler {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolXmlHandler.class);
@@ -59,10 +60,18 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentPosition.setId(id);
             this.currentPosition.setName(attributes.getValue("name"));
             this.currentPosition.setDescription(attributes.getValue("description"));
-            this.currentPosition.setLength(Integer.parseInt(attributes.getValue("length")));
-            this.currentPosition.setVariableLength(Boolean.parseBoolean(attributes
-                    .getValue("variableLength")));
-            this.currentPosition.setLengthFormula(attributes.getValue("lengthFormula"));
+            String length = attributes.getValue("length");
+            if(Property.isFormula(length)) {
+                this.currentPosition.setVariableLength(true);
+                String lengthFormula = Property.extractFormula(length);
+                this.currentPosition.setLengthFormula(lengthFormula);
+                String[] operators = Property.extractOperators(lengthFormula);
+                for(String operator : operators) {
+                    this.protocol.getCache().put(operator, "");
+                }
+            } else {
+                this.currentPosition.setLength(Integer.parseInt(length));
+            }
         } else if("decode".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading decode element[id:{}]......", id);
@@ -71,8 +80,13 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentDecode.setName(attributes.getValue("name"));
             this.currentDecode.setDescription(attributes.getValue("description"));
             this.currentDecode.setType(Decode.Type.get(attributes.getValue("type")));
-            this.currentDecode.setValue(attributes.getValue("value"));
-            this.currentDecode.setOption(Boolean.parseBoolean(attributes.getValue("option")));
+            this.currentDecode.setProcess(Decode.Process.get(attributes.getValue("process")));
+            String value = attributes.getValue("value");
+            this.currentDecode.setValue(value);
+            if(StringUtils.isNotBlank(value) && Property.isReference(value)) {
+                String valueReference = Property.extractReference(value);
+                this.protocol.getCache().put(valueReference, "");
+            }
             this.currentDecode.setProtocol(Boolean.parseBoolean(attributes.getValue("protocol")));
         } else if("options".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
@@ -94,8 +108,8 @@ public class ProtocolXmlHandler extends DefaultHandler {
             boolean range = Boolean.parseBoolean(attributes.getValue("range"));
             this.currentOption.setRange(range);
             if(range) {
-                this.currentOption.setMin(Integer.parseInt(attributes.getValue("min")));
-                this.currentOption.setMax(Integer.parseInt(attributes.getValue("max")));
+                this.currentOption.setMin(Integer.parseInt(attributes.getValue("min"), 16));
+                this.currentOption.setMax(Integer.parseInt(attributes.getValue("max"), 16));
             }
             this.currentOption.setUnit(attributes.getValue("unit"));
         }

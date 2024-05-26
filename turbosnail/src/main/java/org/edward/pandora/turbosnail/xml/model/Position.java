@@ -2,7 +2,7 @@ package org.edward.pandora.turbosnail.xml.model;
 
 public class Position extends Element {
     private int length;
-    private boolean variableLength;
+    private boolean variableLength = false;
     private String lengthFormula;
 
     public int getLength() {

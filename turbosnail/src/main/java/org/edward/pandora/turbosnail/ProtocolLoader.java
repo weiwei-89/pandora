@@ -43,7 +43,6 @@ public class ProtocolLoader {
                 logger.info("done");
             } catch(Exception e) {
                 logger.error("reading protocol goes wrong", e);
-                e.printStackTrace();
             }
         }
         return papersMap;
