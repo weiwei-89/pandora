@@ -14,9 +14,9 @@ import java.util.Map;
 
 public class ProtocalDecodeTest {
     private static final String PATH = "D:\\edward\\file\\我的工作\\项目\\2023.01.02 极速蜗牛";
-    private static final String PROTOCOL_PATH = PATH + File.separator + "protocol";
-    private static final String PROTOCOL_ID = "protocol_test";
-    private static final String FILE_PATH = PATH + File.separator + "日志.txt";
+    private static final String PROTOCOL_PATH = PATH + File.separator + "protocol" + File.separator + "gbt32960";
+    private static final String PROTOCOL_ID = "gbt32960";
+    private static final String DATA_PATH = PATH + File.separator + "protocol" + File.separator + "gbt32960" + File.separator + "测试数据.txt";
 
     public static void main(String[] args) throws Exception {
         Path path = new Path(PROTOCOL_PATH, PROTOCOL_ID);
@@ -24,12 +24,13 @@ public class ProtocalDecodeTest {
                 .setFormat("xml")
                 .load(new Path[]{path});
         Papers papers = papersMap.get(PROTOCOL_ID);
-        BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH));
+        BufferedReader reader = new BufferedReader(new FileReader(DATA_PATH));
         StringBuilder sb = new StringBuilder();
         String line = null;
         while((line=reader.readLine()) != null) {
             sb.append(line.replaceAll(" ", ""));
         }
+        // TODO PROTOCOL_ID的值要与根协议的ID一样
         ProtocolDecoder decoder = new ProtocolDecoder(papers, PROTOCOL_ID);
         Info info = decoder.decode(DataUtil.hexToBytes(sb.toString()));
         Knife knife = Knife.build();

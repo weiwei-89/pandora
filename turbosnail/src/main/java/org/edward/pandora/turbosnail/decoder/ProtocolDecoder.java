@@ -1,5 +1,6 @@
 package org.edward.pandora.turbosnail.decoder;
 
+import org.apache.commons.jexl3.*;
 import org.edward.pandora.turbosnail.Papers;
 import org.edward.pandora.turbosnail.decoder.model.Data;
 import org.edward.pandora.turbosnail.decoder.model.Info;
@@ -73,6 +74,23 @@ public class ProtocolDecoder {
         Position position = segment.getPosition();
         if(position == null) {
             throw new Exception("there's not a position element");
+        }
+        if(position.isVariableLength()) {
+            JexlContext jexlContext = new MapContext();
+            String[] operators = Property.extractOperators(position.getLengthFormula());
+            for(int i=0; i<operators.length; i++) {
+                String operator = operators[i];
+                String operatorValue = null;
+                if(protocol.getCache().containsKey(operator)) {
+                    operatorValue = protocol.getCache().get(operator);
+                    jexlContext.set(operator, operatorValue);
+                }
+            }
+            JexlEngine jexlEngine = new JexlBuilder().create();
+            JexlExpression jexlExpression = jexlEngine.createExpression(position.getLengthFormula());
+            Object result = jexlExpression.evaluate(jexlContext);
+            int length = Integer.valueOf(result.toString());
+            position.setLength(length);
         }
         if(position.getLength() < 0) {
             throw new Exception("\"length\" is less than 0");
