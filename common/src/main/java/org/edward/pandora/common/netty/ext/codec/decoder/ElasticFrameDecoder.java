@@ -34,11 +34,6 @@ public class ElasticFrameDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if(this.findDelimiter) {
-            if(this.delimiterIndex > 0) {
-                in.skipBytes(this.delimiterIndex-in.readerIndex());
-                in.discardReadBytes();
-                this.delimiterIndex = 0;
-            }
             if(in.readableBytes() >= this.delimiter.length*2) {
                 ByteBuf cache = in.slice(this.delimiter.length, in.readableBytes()-this.delimiter.length);
                 int nextDelimiterIndex = ByteBufUtil.index(cache, this.delimiter);

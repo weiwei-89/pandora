@@ -37,11 +37,6 @@ public class FrameDecoder extends ByteToMessageDecoder {
             return;
         }
         if(this.findDelimiter) {
-            if(this.delimiterIndex > 0) {
-                in.skipBytes(this.delimiterIndex-in.readerIndex());
-                in.discardReadBytes();
-                this.delimiterIndex = 0;
-            }
             if(in.readableBytes() >= this.length) {
                 out.add(in.readRetainedSlice(this.length));
                 this.findDelimiter = false;
