@@ -4,6 +4,7 @@ public class Element {
     private String id;
     private String name;
     private String description;
+    private Element protocol;
 
     public String getId() {
         return this.id;
@@ -22,5 +23,11 @@ public class Element {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+    public Element getProtocol() {
+        return this.protocol;
+    }
+    public void setProtocol(Element protocol) {
+        this.protocol = protocol;
     }
 }

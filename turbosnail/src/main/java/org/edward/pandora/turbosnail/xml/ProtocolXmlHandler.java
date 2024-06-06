@@ -52,6 +52,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentSegment.setId(id);
             this.currentSegment.setName(attributes.getValue("name"));
             this.currentSegment.setDescription(attributes.getValue("description"));
+            this.currentSegment.setProtocol(this.protocol);
             this.currentSegment.setSkip(Boolean.parseBoolean(attributes.getValue("skip")));
         } else if("position".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");

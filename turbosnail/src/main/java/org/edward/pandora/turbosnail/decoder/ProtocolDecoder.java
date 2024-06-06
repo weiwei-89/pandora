@@ -26,32 +26,34 @@ public class ProtocolDecoder {
 
     public Info decode(byte[] bytes) throws Exception {
         logger.info("decoding protocol[protocol_id:{}]......", this.protocolId);
-        Info info = new Info();
         Protocol protocol = this.papers.get(this.protocolId);
         if(protocol == null) {
             throw new Exception("protocol \""+this.protocolId+"\" doesn't exist");
         }
-        this.decode(new Data(bytes), protocol, info);
+        Info info = this.decode(new Data(bytes), protocol);
         logger.info("done");
         return info;
     }
 
-    private void decode(Data data, Protocol protocol, Info info) throws Exception {
+    private Info decode(Data data, Protocol protocol) throws Exception {
         List<Segment> segmentList = protocol.getSegmentList();
         if(segmentList==null || segmentList.size()==0) {
-            return;
+            return null;
         }
+        Info info = new Info();
         for(int i=0; i<segmentList.size(); i++) {
-            this.decode(data, protocol, segmentList.get(i), info);
+            info.put(segmentList.get(i).getId(), this.decode(data, segmentList.get(i)));
         }
+        return info;
     }
 
-    private void decode(Data data, Protocol protocol, Segment segment, Info info) throws Exception {
+    private Object decode(Data data, Segment segment) throws Exception {
         logger.info("decoding segment[segment_id:{}]......", segment.getId());
         Decode decode = segment.getDecode();
         if(decode == null) {
             throw new Exception("there's not a decode element");
         }
+        Protocol protocol = (Protocol) segment.getProtocol();
         if(decode.isProtocol()) {
             String protocolName = null;
             if(Property.isReference(decode.getValue())) {
@@ -66,10 +68,7 @@ public class ProtocolDecoder {
             if(subProtocol == null) {
                 throw new Exception("protocol \""+protocolName+"\" doesn't exist");
             }
-            Info infoForProtocol = new Info();
-            this.decode(data, subProtocol, infoForProtocol);
-            info.put(segment.getId(), infoForProtocol);
-            return;
+            return this.decode(data, subProtocol);
         }
         Position position = segment.getPosition();
         if(position == null) {
@@ -98,7 +97,7 @@ public class ProtocolDecoder {
         if(segment.isSkip()) {
             data.skip(position.getLength());
             logger.info("skipping......");
-            return;
+            return null;
         }
         byte[] partBytes = data.read(position.getLength());
         Decode.Type type = decode.getType();
@@ -116,10 +115,10 @@ public class ProtocolDecoder {
             this.process(value0, segment, decode, process, value1);
             value = value1.getContent();
         }
-        info.put(segment.getId(), value);
         if(protocol.getCache().containsKey(segment.getId())) {
             protocol.getCache().put(segment.getId(), value);
         }
+        return value;
     }
 
     private String decode(byte[] bytes, Decode.Type type) throws Exception {
