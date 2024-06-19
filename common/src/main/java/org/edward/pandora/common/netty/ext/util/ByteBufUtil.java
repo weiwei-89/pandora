@@ -6,7 +6,7 @@ public class ByteBufUtil {
     public static byte[] getReadableBytes(ByteBuf buffer) {
         ByteBuf part = buffer.slice();
         byte[] bytes = new byte[part.readableBytes()];
-        part.writeBytes(bytes);
+        part.readBytes(bytes);
         return bytes;
     }
 
