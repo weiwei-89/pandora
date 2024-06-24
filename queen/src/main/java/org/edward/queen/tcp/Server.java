@@ -25,29 +25,42 @@ public class Server {
     }
 
     private Channel channel;
+    private ChannelInitializer<? extends SocketChannel> initializer;
+
+    public void setInitializer(ChannelInitializer<? extends SocketChannel> initializer) {
+        this.initializer = initializer;
+    }
 
     public void startup() throws Exception {
         logger.info("starting up server[port:{}]......", this.config.getPort());
         EventLoopGroup parentGroup = new NioEventLoopGroup();
         EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
-            StatusHandler statusHandler = new StatusHandler();
+            ChannelInitializer<? extends SocketChannel> initializer = null;
+            if(this.initializer == null) {
+                StatusHandler statusHandler = new StatusHandler();
+                initializer = new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                                .addLast(new IdleHandler(
+                                        config.getReadTimeout(),
+                                        config.getWriteTimeout(),
+                                        config.getReadWriteTimeout(),
+                                        TimeUnit.MILLISECONDS))
+                                .addLast(statusHandler)
+                                .addLast(new Heartbeater(100L));
+                    }
+                };
+            } else {
+                initializer = this.initializer;
+            }
             this.channel = new ServerBootstrap()
                     .group(parentGroup, childGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline()
-                                    .addLast(new IdleHandler(
-                                            config.getReadTimeout(),
-                                            config.getWriteTimeout(),
-                                            config.getReadWriteTimeout(),
-                                            TimeUnit.MILLISECONDS))
-                                    .addLast(statusHandler)
-                                    .addLast(new Heartbeater(100L));
-                        }
-                    }).bind(this.config.getPort()).sync().channel();
+                    .childHandler(initializer)
+                    .bind(this.config.getPort())
+                    .sync().channel();
             logger.info("done");
             this.channel.closeFuture().sync();
             logger.info("server stopped[port:{}]", this.config.getPort());

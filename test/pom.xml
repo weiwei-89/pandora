@@ -34,5 +34,10 @@
             <artifactId>turbosnail</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.edward</groupId>
+            <artifactId>queen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
