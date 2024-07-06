@@ -41,11 +41,12 @@ public class HttpServerTest {
                                         Unpooled.copiedBuffer("Hello world!", CharsetUtil.UTF_8));
                                 response.headers()
                                         .set(HttpHeaderNames.CONTENT_TYPE, "text/plain")
-                                        .set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
+                                        .set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
                                 ctx.writeAndFlush(response);
                             }
                         });
             }
         });
+        server.startup();
     }
 }
