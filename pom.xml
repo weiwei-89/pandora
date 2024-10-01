@@ -11,9 +11,9 @@
         <module>common</module>
         <module>onion</module>
         <module>turbosnail</module>
-        <module>test</module>
         <module>bee</module>
         <module>queen</module>
+        <module>test</module>
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -54,9 +54,9 @@
             <id>dev</id>
             <properties>
                 <config>dev</config>
-                <commonEnv>common-dev</commonEnv>
-                <beeEnv>bee-dev</beeEnv>
-                <queenEnv>queen-dev</queenEnv>
+                <commonEnv>common</commonEnv>
+                <beeEnv>bee</beeEnv>
+                <queenEnv>queen</queenEnv>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -66,9 +66,9 @@
             <id>test</id>
             <properties>
                 <config>test</config>
-                <commonEnv>common-test</commonEnv>
-                <beeEnv>bee-test</beeEnv>
-                <queenEnv>queen-test</queenEnv>
+                <commonEnv>common</commonEnv>
+                <beeEnv>bee</beeEnv>
+                <queenEnv>queen</queenEnv>
             </properties>
         </profile>
     </profiles>
