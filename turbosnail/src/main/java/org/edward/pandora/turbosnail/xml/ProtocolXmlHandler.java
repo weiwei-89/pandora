@@ -32,7 +32,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
 
     @Override
     public void startDocument() throws SAXException {
-        logger.info("reading protocol file......");
+        logger.info(">> reading protocol file");
     }
 
     @Override
@@ -40,14 +40,14 @@ public class ProtocolXmlHandler extends DefaultHandler {
                              Attributes attributes) throws SAXException {
         if("protocol".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
-            logger.info("reading protocol element[id:{}]......", id);
+            logger.info("reading protocol element [id:{}]", id);
             this.protocol.setId(id);
             this.protocol.setName(attributes.getValue("name"));
             this.protocol.setDescription(attributes.getValue("description"));
             this.protocol.setSegmentList(new ArrayList<>());
         } else if("segment".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
-            logger.info("reading segment element[id:{}]......", id);
+            logger.info("reading segment element [id:{}]", id);
             this.currentSegment = new Segment();
             this.currentSegment.setId(id);
             this.currentSegment.setName(attributes.getValue("name"));
@@ -56,7 +56,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentSegment.setSkip(Boolean.parseBoolean(attributes.getValue("skip")));
         } else if("position".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
-            logger.info("reading position element[id:{}]......", id);
+            logger.info("reading position element [id:{}]", id);
             this.currentPosition = new Position();
             this.currentPosition.setId(id);
             this.currentPosition.setName(attributes.getValue("name"));
@@ -75,7 +75,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             }
         } else if("decode".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
-            logger.info("reading decode element[id:{}]......", id);
+            logger.info("reading decode element [id:{}]", id);
             this.currentDecode = new Decode();
             this.currentDecode.setId(id);
             this.currentDecode.setName(attributes.getValue("name"));
@@ -91,7 +91,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentDecode.setProtocol(Boolean.parseBoolean(attributes.getValue("protocol")));
         } else if("options".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
-            logger.info("reading options element[id:{}]......", id);
+            logger.info("reading options element [id:{}]", id);
             this.currentOptions = new Options();
             this.currentOptions.setId(id);
             this.currentOptions.setName(attributes.getValue("name"));
@@ -99,7 +99,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentSegment.setOptionList(new ArrayList<>());
         } else if("option".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
-            logger.info("reading option element[id:{}]......", id);
+            logger.info("reading option element [id:{}]", id);
             this.currentOption = new Option();
             this.currentOption.setId(id);
             this.currentOption.setName(attributes.getValue("name"));
@@ -120,27 +120,32 @@ public class ProtocolXmlHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if("segment".equalsIgnoreCase(qName)) {
             if(this.protocol == null) {
-                throw new SAXException("there's not a protocol element as its parent[segment:"+qName+"]");
+                throw new SAXException(String.format("there's not a protocol element" +
+                        " as its parent [segment:%s]", qName));
             }
             this.protocol.getSegmentList().add(this.currentSegment);
         } else if("position".equalsIgnoreCase(qName)) {
             if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent[position:"+qName+"]");
+                throw new SAXException(String.format("there's not a segment element" +
+                        " as its parent [position:%s]", qName));
             }
             this.currentSegment.setPosition(this.currentPosition);
         } else if("decode".equalsIgnoreCase(qName)) {
             if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent[decode:"+qName+"]");
+                throw new SAXException(String.format("there's not a segment element" +
+                        " as its parent [decode:%s]", qName));
             }
             this.currentSegment.setDecode(this.currentDecode);
         } else if("options".equalsIgnoreCase(qName)) {
             if(this.currentSegment == null) {
-                throw new SAXException("there's not a segment element as its parent[options:"+qName+"]");
+                throw new SAXException(String.format("there's not a segment element" +
+                        " as its parent [options:%s]", qName));
             }
             this.currentSegment.setOptions(this.currentOptions);
         } else if("option".equalsIgnoreCase(qName)) {
             if(this.currentSegment.getOptionList() == null) {
-                throw new SAXException("there's not an options element as its parent[option:"+qName+"]");
+                throw new SAXException(String.format("there's not an options element" +
+                        " as its parent [option:%s]", qName));
             }
             this.currentSegment.getOptionList().add(this.currentOption);
         }
@@ -149,6 +154,6 @@ public class ProtocolXmlHandler extends DefaultHandler {
 
     @Override
     public void endDocument() throws SAXException {
-        logger.info("done");
+        logger.info(">> done");
     }
 }

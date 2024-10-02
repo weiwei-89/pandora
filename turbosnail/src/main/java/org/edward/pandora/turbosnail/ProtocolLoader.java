@@ -9,12 +9,10 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ProtocolLoader {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolLoader.class);
-    private static final String DEFAULT_FORMAT = "xml";
+    public static final String DEFAULT_FORMAT = "xml";
 
     private ProtocolLoader() {
 
@@ -31,44 +29,32 @@ public class ProtocolLoader {
         return this;
     }
 
-    public Map<String, Papers> load(Path[] pathArray) throws Exception {
-        if(pathArray==null || pathArray.length==0) {
-            throw new Exception("path is not specified");
-        }
-        Map<String, Papers> papersMap = new HashMap<>(pathArray.length);
-        for(int p=0; p<pathArray.length; p++) {
-            logger.info("reading protocol[protocol_id:{}]......", pathArray[p].getProtocolId());
-            try {
-                papersMap.put(pathArray[p].getProtocolId(), load(pathArray[p].getPath()));
-                logger.info("done");
-            } catch(Exception e) {
-                logger.error("reading protocol goes wrong", e);
-            }
-        }
-        return papersMap;
-    }
-
-    private Papers load(String path) throws Exception {
-        File pathFile = new File(path);
+    public Papers load(Path path) throws Exception {
+        File pathFile = new File(path.getPath());
         if(!pathFile.isDirectory()) {
-            throw new Exception("\""+path+"\" is not a path");
+            throw new Exception(String.format("\"%s\" is not a path", path.getPath()));
         }
         File[] protocolFileArray = pathFile.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.endsWith("."+format);
+                return name.toLowerCase().endsWith("."+format.toLowerCase());
             }
         });
         if(protocolFileArray==null || protocolFileArray.length==0) {
-            throw new Exception("there are no any protocol files in path \""+path+"\"");
+            throw new Exception("there are no protocol files");
         }
-        Papers papers = new Papers(protocolFileArray.length);
+        Papers papers = new Papers(protocolFileArray.length, path.getProtocolId());
         for(int f=0; f<protocolFileArray.length; f++) {
-            SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-            ProtocolXmlHandler protocolXmlHandler = new ProtocolXmlHandler();
-            saxParser.parse(protocolFileArray[f], protocolXmlHandler);
-            Protocol protocol = protocolXmlHandler.getProtocol();
-            papers.put(protocol.getId(), protocol);
+            logger.info("loading protocol file [{}]", protocolFileArray[f].getPath());
+            try {
+                SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+                ProtocolXmlHandler protocolXmlHandler = new ProtocolXmlHandler();
+                saxParser.parse(protocolFileArray[f], protocolXmlHandler);
+                Protocol protocol = protocolXmlHandler.getProtocol();
+                papers.put(protocol.getId(), protocol);
+            } catch(Exception e) {
+                logger.error("loading error", e);
+            }
         }
         return papers;
     }

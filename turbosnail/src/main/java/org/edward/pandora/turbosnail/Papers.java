@@ -5,11 +5,18 @@ import org.edward.pandora.turbosnail.xml.model.Protocol;
 import java.util.HashMap;
 
 public class Papers extends HashMap<String, Protocol> {
-    public Papers() {
+    private final String protocolId;
 
+    public Papers() {
+        this.protocolId = null;
     }
 
-    public Papers(int size) {
+    public Papers(int size, String protocolId) {
         super(size);
+        this.protocolId = protocolId;
+    }
+
+    public String getProtocolId() {
+        return this.protocolId;
     }
 }

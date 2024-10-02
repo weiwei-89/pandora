@@ -17,18 +17,16 @@ public class ProtocolDecoder {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolDecoder.class);
 
     private final Papers papers;
-    private final String protocolId;
 
-    public ProtocolDecoder(Papers papers, String protocolId) {
+    public ProtocolDecoder(Papers papers) {
         this.papers = papers;
-        this.protocolId = protocolId;
     }
 
     public Info decode(byte[] bytes) throws Exception {
-        logger.info("decoding protocol[protocol_id:{}]......", this.protocolId);
-        Protocol protocol = this.papers.get(this.protocolId);
+        logger.info("decoding protocol[protocol_id:{}]......", this.papers.getProtocolId());
+        Protocol protocol = this.papers.get(this.papers.getProtocolId());
         if(protocol == null) {
-            throw new Exception("protocol \""+this.protocolId+"\" doesn't exist");
+            throw new Exception("protocol \""+this.papers.getProtocolId()+"\" doesn't exist");
         }
         Info info = this.decode(new Data(bytes), protocol);
         logger.info("done");
