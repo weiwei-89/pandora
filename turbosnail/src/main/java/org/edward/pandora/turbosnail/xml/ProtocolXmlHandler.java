@@ -49,15 +49,18 @@ public class ProtocolXmlHandler extends DefaultHandler {
             String id = attributes.getValue("id");
             logger.info("reading segment element [id:{}]", id);
             this.currentSegment = new Segment();
+            this.currentSegment.setProtocol(this.protocol);
+            this.currentSegment.setParent(this.protocol);
             this.currentSegment.setId(id);
             this.currentSegment.setName(attributes.getValue("name"));
             this.currentSegment.setDescription(attributes.getValue("description"));
-            this.currentSegment.setProtocol(this.protocol);
             this.currentSegment.setSkip(Boolean.parseBoolean(attributes.getValue("skip")));
         } else if("position".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading position element [id:{}]", id);
             this.currentPosition = new Position();
+            this.currentPosition.setProtocol(this.protocol);
+            this.currentPosition.setParent(this.currentSegment);
             this.currentPosition.setId(id);
             this.currentPosition.setName(attributes.getValue("name"));
             this.currentPosition.setDescription(attributes.getValue("description"));
@@ -77,6 +80,8 @@ public class ProtocolXmlHandler extends DefaultHandler {
             String id = attributes.getValue("id");
             logger.info("reading decode element [id:{}]", id);
             this.currentDecode = new Decode();
+            this.currentDecode.setProtocol(this.protocol);
+            this.currentDecode.setParent(this.currentSegment);
             this.currentDecode.setId(id);
             this.currentDecode.setName(attributes.getValue("name"));
             this.currentDecode.setDescription(attributes.getValue("description"));
@@ -93,6 +98,8 @@ public class ProtocolXmlHandler extends DefaultHandler {
             String id = attributes.getValue("id");
             logger.info("reading options element [id:{}]", id);
             this.currentOptions = new Options();
+            this.currentOptions.setProtocol(this.protocol);
+            this.currentOptions.setParent(this.currentSegment);
             this.currentOptions.setId(id);
             this.currentOptions.setName(attributes.getValue("name"));
             this.currentOptions.setDescription(attributes.getValue("description"));
@@ -101,6 +108,8 @@ public class ProtocolXmlHandler extends DefaultHandler {
             String id = attributes.getValue("id");
             logger.info("reading option element [id:{}]", id);
             this.currentOption = new Option();
+            this.currentOption.setProtocol(this.protocol);
+            this.currentOption.setParent(this.currentSegment);
             this.currentOption.setId(id);
             this.currentOption.setName(attributes.getValue("name"));
             this.currentOption.setDescription(attributes.getValue("description"));

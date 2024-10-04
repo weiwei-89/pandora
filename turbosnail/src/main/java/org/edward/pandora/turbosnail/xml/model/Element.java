@@ -1,11 +1,24 @@
 package org.edward.pandora.turbosnail.xml.model;
 
 public class Element {
+    private Element protocol;
+    private Element parent;
     private String id;
     private String name;
     private String description;
-    private Element protocol;
 
+    public Element getProtocol() {
+        return this.protocol;
+    }
+    public void setProtocol(Element protocol) {
+        this.protocol = protocol;
+    }
+    public Element getParent() {
+        return this.parent;
+    }
+    public void setParent(Element parent) {
+        this.parent = parent;
+    }
     public String getId() {
         return this.id;
     }
@@ -23,11 +36,5 @@ public class Element {
     }
     public void setDescription(String description) {
         this.description = description;
-    }
-    public Element getProtocol() {
-        return this.protocol;
-    }
-    public void setProtocol(Element protocol) {
-        this.protocol = protocol;
     }
 }
