@@ -11,8 +11,8 @@ public class Session {
         this.channel = channel;
     }
 
-    public static Session create() throws Exception {
-        return new Session(Client.getClient().connect());
+    public static Session create(Config config) throws Exception {
+        return new Session(Client.getClient().connect(config));
     }
 
     public Session login(User user) {

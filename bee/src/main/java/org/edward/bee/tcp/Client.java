@@ -9,17 +9,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class Client {
-    private final Config config;
-
-    private Client(Config config) {
-        this.config = config;
-    }
-
     private static Client client;
 
-    public static synchronized Client build(Config config) {
+    public static synchronized Client build() {
         if(client == null) {
-            client = new Client(config);
+            client = new Client();
         }
         client.startup();
         return client;
@@ -45,9 +39,8 @@ public class Client {
                 });
     }
 
-    public Channel connect() throws Exception {
-        return this.bootstrap.connect(this.config.getHost(), this.config.getPort())
-                .sync().channel();
+    public Channel connect(Config config) throws Exception {
+        return this.bootstrap.connect(config.getHost(), config.getPort()).sync().channel();
     }
 
     public void shutdown() {

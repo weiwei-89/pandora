@@ -31,10 +31,10 @@ public class HttpServerTest {
                             @Override
                             protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg)
                                     throws Exception {
-                                logger.info("uri:{}", msg.uri());
+                                logger.info("uri: {}", msg.uri());
                                 ByteBuf content = msg.content();
                                 String jsonData = new String(ByteBufUtil.getReadableBytes(content));
-                                logger.info("json:{}", jsonData);
+                                logger.info("json: {}", jsonData);
                                 FullHttpResponse response = new DefaultFullHttpResponse(
                                         HttpVersion.HTTP_1_1,
                                         HttpResponseStatus.OK,

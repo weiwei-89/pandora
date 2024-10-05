@@ -32,7 +32,7 @@ public class Server {
     }
 
     public void startup() throws Exception {
-        logger.info("starting up server[port:{}]......", this.config.getPort());
+        logger.info("starting up server [port:{}]......", this.config.getPort());
         EventLoopGroup parentGroup = new NioEventLoopGroup();
         EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
@@ -63,7 +63,7 @@ public class Server {
                     .sync().channel();
             logger.info("done");
             this.channel.closeFuture().sync();
-            logger.info("server stopped[port:{}]", this.config.getPort());
+            logger.info("server stopped [port:{}]", this.config.getPort());
         } finally {
             logger.info("cleaning up......");
             parentGroup.shutdownGracefully().sync();
@@ -73,7 +73,7 @@ public class Server {
     }
 
     public void shutdown() throws Exception {
-        logger.info("shutting down server[port:{}]......", this.config.getPort());
+        logger.info("shutting down server [port:{}]......", this.config.getPort());
         if(this.channel == null) {
             logger.info("done(stopped)");
             return;

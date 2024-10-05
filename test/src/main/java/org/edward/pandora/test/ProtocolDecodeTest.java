@@ -37,6 +37,6 @@ public class ProtocolDecodeTest {
         Info info = decoder.decode(DataUtil.hexToBytes(sb.toString()));
         Knife knife = Knife.build();
         Object result = knife.peel(info);
-        System.out.println("result: " + JSON.toJSONString(result));
+        logger.info("result: {}", JSON.toJSONString(result));
     }
 }

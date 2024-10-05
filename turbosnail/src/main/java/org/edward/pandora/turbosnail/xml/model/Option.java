@@ -9,7 +9,7 @@ public class Option extends Element {
     private String unit;
 
     public String getCode() {
-        return code;
+        return this.code;
     }
     public void setCode(String code) {
         this.code = code;

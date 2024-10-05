@@ -7,9 +7,11 @@ import org.slf4j.LoggerFactory;
 public class Connector {
     private static final Logger logger = LoggerFactory.getLogger(Connector.class);
 
+    private final Config config;
     private final User user;
 
-    public Connector(User user) {
+    public Connector(Config config, User user) {
+        this.config = config;
         this.user = user;
     }
 
@@ -19,14 +21,14 @@ public class Connector {
         logger.info("sending info......");
         if(this.session == null) {
             logger.info("there's no session, trying to connect......");
-            this.session = Session.create().login(this.user);
+            this.session = Session.create(this.config).login(this.user);
             logger.info("session established");
         }
         if(!this.session.isActive()) {
             logger.info("the session is inactive, trying to reconnect......");
             this.session.close();
-            this.session = Session.create().login(this.user);
-            logger.info("session established");
+            this.session = Session.create(this.config).login(this.user);
+            logger.info("session established again");
         }
         this.session.send(info.getBytes());
         logger.info("done");

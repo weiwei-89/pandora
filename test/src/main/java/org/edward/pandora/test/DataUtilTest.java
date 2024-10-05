@@ -13,16 +13,16 @@ public class DataUtilTest {
         String cc = "7f";
 //        byte[] dd = DataUtil.hexToBytes(cc);
         int total = Integer.parseInt(cc, 16);
-        System.out.println("total = " + total);
+        System.out.println("total: " + total);
         String exp = "2*3+(5-9)/2";
         String[] operators = exp.split("\\s*([+\\-*/()])\\s*");
-        System.out.println("operators = " + JSON.toJSONString(operators));
+        System.out.println("operators: " + JSON.toJSONString(operators));
         JexlEngine jexlEngine = new JexlBuilder().create();
         String expression = "3 + 4";
         JexlExpression jexlExpression = jexlEngine.createExpression(expression);
         Object result = jexlExpression.evaluate(null);
-        System.out.println("result = " + result);
+        System.out.println("result: " + result);
         int aa = 15;
-        System.out.println("aa = " + Arrays.toString(DataUtil.toHexArray(DataUtil.intToBytesForBigEndian(aa))));
+        System.out.println("aa: " + Arrays.toString(DataUtil.toHexArray(DataUtil.intToBytesForBigEndian(aa))));
     }
 }

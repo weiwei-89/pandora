@@ -42,7 +42,7 @@ public class TcpServerTest {
                                 try {
                                     if(msg instanceof ByteBuf) {
                                         ByteBuf buffer = (ByteBuf) msg;
-                                        logger.info("hex:{}",
+                                        logger.info("hex: {}",
                                                 DataUtil.toHexString(ByteBufUtil.getReadableBytes(buffer)));
                                     }
                                 } finally {
