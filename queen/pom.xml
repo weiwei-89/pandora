@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.edward</groupId>
-        <artifactId>pandora</artifactId>
+        <groupId>org.edward.pandora</groupId>
+        <artifactId>pandora-dependency</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>queen</artifactId>
@@ -28,7 +28,7 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.edward</groupId>
+            <groupId>org.edward.pandora</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>

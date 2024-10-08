@@ -1,4 +1,4 @@
-package org.edward.queen.tcp;
+package org.edward.pandora.common.netty.ext.server;
 
 public class Config {
     private int port;

@@ -1,4 +1,4 @@
-package org.edward.bee;
+package org.edward.pandora.bee;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package org.edward.queen.tcp;
+package org.edward.pandora.common.netty.ext.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -9,7 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.edward.pandora.common.netty.ext.handler.Heartbeater;
 import org.edward.pandora.common.netty.ext.handler.IdleHandler;
-import org.edward.queen.tcp.handler.StatusHandler;
+import org.edward.pandora.common.netty.ext.handler.StatusHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

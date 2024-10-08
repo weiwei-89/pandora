@@ -1,4 +1,4 @@
-package org.edward.queen.tcp.handler;
+package org.edward.pandora.common.netty.ext.handler;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

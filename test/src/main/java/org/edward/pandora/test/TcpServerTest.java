@@ -10,8 +10,8 @@ import org.edward.pandora.common.netty.ext.codec.decoder.FrameDecoder;
 import org.edward.pandora.common.netty.ext.handler.Heartbeater;
 import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
 import org.edward.pandora.common.util.DataUtil;
-import org.edward.queen.tcp.Config;
-import org.edward.queen.tcp.Server;
+import org.edward.pandora.common.netty.ext.server.Config;
+import org.edward.pandora.common.netty.ext.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

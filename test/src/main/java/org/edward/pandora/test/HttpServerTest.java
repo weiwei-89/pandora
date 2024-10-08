@@ -9,8 +9,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
-import org.edward.queen.tcp.Config;
-import org.edward.queen.tcp.Server;
+import org.edward.pandora.common.netty.ext.server.Config;
+import org.edward.pandora.common.netty.ext.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

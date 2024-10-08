@@ -1,4 +1,4 @@
-package org.edward.bee.tcp;
+package org.edward.pandora.common.netty.ext.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;

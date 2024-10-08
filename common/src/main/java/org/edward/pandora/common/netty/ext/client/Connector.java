@@ -1,4 +1,4 @@
-package org.edward.bee.tcp;
+package org.edward.pandora.common.netty.ext.client;
 
 import org.edward.pandora.common.model.User;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package org.edward.queen;
+package org.edward.pandora.queen;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
