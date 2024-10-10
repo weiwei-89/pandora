@@ -7,6 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import org.edward.pandora.common.netty.ext.handler.Heartbeater;
 import org.edward.pandora.common.netty.ext.handler.IdleHandler;
 import org.edward.pandora.common.netty.ext.handler.StatusHandler;
@@ -49,7 +50,8 @@ public class Server {
                                         config.getReadWriteTimeout(),
                                         TimeUnit.MILLISECONDS))
                                 .addLast(statusHandler)
-                                .addLast(new Heartbeater(100L));
+                                .addLast(new Heartbeater(100L))
+                                .addLast(new LineBasedFrameDecoder(200));
                     }
                 };
             } else {

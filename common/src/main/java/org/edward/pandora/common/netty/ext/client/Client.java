@@ -7,6 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.edward.pandora.common.netty.ext.codec.encoder.Appender;
 
 public class Client {
     private static Client client;
@@ -15,7 +16,6 @@ public class Client {
         if(client == null) {
             client = new Client();
         }
-        client.startup();
         return client;
     }
 
@@ -25,18 +25,30 @@ public class Client {
 
     private EventLoopGroup group;
     private Bootstrap bootstrap;
+    private ChannelInitializer<? extends SocketChannel> initializer;
 
-    private void startup() {
+    public void setInitializer(ChannelInitializer<? extends SocketChannel> initializer) {
+        this.initializer = initializer;
+    }
+
+    public void startup() {
         this.group = new NioEventLoopGroup();
+        ChannelInitializer<? extends SocketChannel> initializer = null;
+        if(this.initializer == null) {
+            initializer = new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(SocketChannel ch) throws Exception {
+                    ch.pipeline()
+                            .addLast(new Appender("\r\n".getBytes()));
+                }
+            };
+        } else {
+            initializer = this.initializer;
+        }
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(this.group)
                 .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-
-                    }
-                });
+                .handler(initializer);
     }
 
     public Channel connect(Config config) throws Exception {
