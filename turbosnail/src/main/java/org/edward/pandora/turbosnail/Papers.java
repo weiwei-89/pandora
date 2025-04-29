@@ -7,10 +7,6 @@ import java.util.HashMap;
 public class Papers extends HashMap<String, Protocol> {
     private final String protocolId;
 
-    public Papers() {
-        this.protocolId = null;
-    }
-
     public Papers(int size, String protocolId) {
         super(size);
         this.protocolId = protocolId;

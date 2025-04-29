@@ -8,6 +8,8 @@ public class Segment extends Element {
     private Options options;
     private List<Option> optionList;
     private boolean skip = false;
+    private boolean multi = false;
+    private int count;
 
     public Position getPosition() {
         return this.position;
@@ -38,5 +40,17 @@ public class Segment extends Element {
     }
     public void setSkip(boolean skip) {
         this.skip = skip;
+    }
+    public boolean isMulti() {
+        return multi;
+    }
+    public void setMulti(boolean multi) {
+        this.multi = multi;
+    }
+    public int getCount() {
+        return count;
+    }
+    public void setCount(int count) {
+        this.count = count;
     }
 }

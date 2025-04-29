@@ -18,7 +18,7 @@ public class ProtocolDecodeTest {
     private static final String PATH = "D:\\edward\\file\\我的工作\\项目\\2023.01.02 极速蜗牛";
     private static final String PROTOCOL_PATH = PATH + File.separator + "测试" + File.separator + "protocol";
     private static final String PROTOCOL_ID = "gbt32960";
-    private static final String DATA_PATH = PATH + File.separator + "测试" + File.separator + "测试数据-车辆登入.txt";
+    private static final String DATA_PATH = PATH + File.separator + "测试" + File.separator + "测试数据-实时信息上报-整车数据.txt";
 
     public static void main(String[] args) throws Exception {
         logger.info("loading protocol \"{}\" [{}]", PROTOCOL_ID, PROTOCOL_PATH);

@@ -55,6 +55,11 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentSegment.setName(attributes.getValue("name"));
             this.currentSegment.setDescription(attributes.getValue("description"));
             this.currentSegment.setSkip(Boolean.parseBoolean(attributes.getValue("skip")));
+            this.currentSegment.setMulti(Boolean.parseBoolean(attributes.getValue("multi")));
+            String count = attributes.getValue("count");
+            if(StringUtils.isNotBlank(count)) {
+                this.currentSegment.setCount(Integer.parseInt(count));
+            }
         } else if("position".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading position element [id:{}]", id);
@@ -109,7 +114,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             logger.info("reading option element [id:{}]", id);
             this.currentOption = new Option();
             this.currentOption.setProtocol(this.protocol);
-            this.currentOption.setParent(this.currentSegment);
+            this.currentOption.setParent(this.currentOptions);
             this.currentOption.setId(id);
             this.currentOption.setName(attributes.getValue("name"));
             this.currentOption.setDescription(attributes.getValue("description"));

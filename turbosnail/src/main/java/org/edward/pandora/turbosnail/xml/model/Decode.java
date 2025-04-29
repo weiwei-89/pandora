@@ -125,7 +125,7 @@ public class Decode extends Element {
         } else if(this.type == null) {
             throw new Exception("decode type is not specified");
         }
-        throw new Exception(String.format("decode type is unsupported", this.type.name()));
+        throw new Exception(String.format("decode type \"%s\" is unsupported", this.type.name()));
     }
 
     private void process(String value0, Value out) throws Exception {
@@ -154,7 +154,7 @@ public class Decode extends Element {
             }
             throw new Exception("there is not a matched element");
         }
-        throw new Exception("process type is unsupported");
+        throw new Exception("process type is not supported");
     }
 
     public String findProtocolName() throws Exception {

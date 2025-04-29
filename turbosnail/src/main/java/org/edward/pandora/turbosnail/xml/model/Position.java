@@ -31,7 +31,7 @@ public class Position extends Element {
         if(this.variableLength) {
             JexlContext jexlContext = new MapContext();
             String[] operators = Property.extractOperators(this.lengthFormula);
-            Protocol protocol = (Protocol) this.getParent().getParent();
+            Protocol protocol = (Protocol) this.getProtocol();
             for(int i=0; i<operators.length; i++) {
                 String operator = operators[i];
                 if(protocol.getCache().containsKey(operator)) {
@@ -42,8 +42,7 @@ public class Position extends Element {
             JexlEngine jexlEngine = new JexlBuilder().create();
             JexlExpression jexlExpression = jexlEngine.createExpression(this.lengthFormula);
             Object result = jexlExpression.evaluate(jexlContext);
-            int length = Integer.valueOf(result.toString());
-            this.length = length;
+            this.length = Integer.parseInt(result.toString());
         }
         if(this.length < 0) {
             throw new Exception("\"length\" is less than 0");

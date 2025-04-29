@@ -23,6 +23,9 @@ public class Data {
     }
 
     public byte[] read(int count) throws Exception {
+        if(!this.readable()) {
+            throw new Exception("data is not readable");
+        }
         byte[] partBytes = new byte[count];
         for(int i=this.readerIndex; i<this.readerIndex+count; i++) {
             partBytes[i-this.readerIndex] = this.bytes[i];
@@ -33,5 +36,12 @@ public class Data {
 
     public void skip(int count) throws Exception {
         this.readerIndex += count;
+    }
+
+    public boolean readable() throws Exception {
+        if(this.readerIndex < this.capacity) {
+            return true;
+        }
+        return false;
     }
 }

@@ -7,6 +7,7 @@ import org.edward.pandora.turbosnail.xml.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProtocolDecoder {
@@ -19,24 +20,48 @@ public class ProtocolDecoder {
     }
 
     public Info decode(byte[] bytes) throws Exception {
-        logger.info("decoding protocol [protocol_id:{}]......", this.papers.getProtocolId());
-        Protocol protocol = this.papers.get(this.papers.getProtocolId());
-        if(protocol == null) {
-            throw new Exception(String.format("protocol \"%s\" doesn't exist", this.papers.getProtocolId()));
+        logger.info("main protocol: {}", this.papers.getProtocolId());
+        Protocol mainProtocol = this.papers.get(this.papers.getProtocolId());
+        if(mainProtocol == null) {
+            throw new Exception(String.format("main protocol \"%s\" doesn't exist", this.papers.getProtocolId()));
         }
-        Info info = this.decode(new Data(bytes), protocol);
+        Info info = this.decode(new Data(bytes), mainProtocol);
         logger.info("done");
         return info;
     }
 
     private Info decode(Data data, Protocol protocol) throws Exception {
+        logger.info("decoding protocol [protocol_id:{}]......", protocol.getId());
         List<Segment> segmentList = protocol.getSegmentList();
         if(segmentList==null || segmentList.size()==0) {
             return null;
         }
-        Info info = new Info();
+        Info info = new Info(segmentList.size());
         for(int i=0; i<segmentList.size(); i++) {
-            info.put(segmentList.get(i).getId(), this.decode(data, segmentList.get(i)));
+            Segment segment = segmentList.get(i);
+            if(segment.isMulti()) {
+                int count = segment.getCount();
+                if(count > 0) {
+                    List<Object> infoList = new ArrayList<>(count);
+                    for(int j=0; j<count; j++) {
+                        infoList.add(this.decode(data, segment));
+                    }
+                    info.put(segmentList.get(i).getId(), infoList);
+                } else {
+                    List<Object> infoList = new ArrayList<>();
+                    while(data.readable()) {
+                        try {
+                            infoList.add(this.decode(data, segment));
+                        } catch(Exception e) {
+                            logger.error("decoding error", e);
+                            break;
+                        }
+                    }
+                    info.put(segmentList.get(i).getId(), infoList);
+                }
+            } else {
+                info.put(segmentList.get(i).getId(), this.decode(data, segment));
+            }
         }
         return info;
     }
