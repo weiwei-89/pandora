@@ -19,6 +19,7 @@ public class ProtocolDecodeTest {
     private static final String PROTOCOL_PATH = PATH + File.separator + "测试" + File.separator + "protocol";
     private static final String PROTOCOL_ID = "gbt32960";
     private static final String DATA_PATH = PATH + File.separator + "测试" + File.separator + "测试数据-实时信息上报-整车数据.txt";
+    private static final String[] COMMENT_MARKERS = {"//", "#", "--", "**"};
 
     public static void main(String[] args) throws Exception {
         logger.info("loading protocol \"{}\" [{}]", PROTOCOL_ID, PROTOCOL_PATH);
@@ -30,6 +31,16 @@ public class ProtocolDecodeTest {
         StringBuilder sb = new StringBuilder();
         String line = null;
         while((line=reader.readLine()) != null) {
+            int commentIndex = -1;
+            for(String marker : COMMENT_MARKERS) {
+                int index = line.indexOf(marker);
+                if(index!=-1 && (commentIndex==-1 || index<commentIndex)) {
+                    commentIndex = index;
+                }
+            }
+            if(commentIndex != -1) {
+                line = line.substring(0, commentIndex);
+            }
             sb.append(line.replaceAll(" ", ""));
         }
         logger.info("decoding data [{}]", DATA_PATH);
