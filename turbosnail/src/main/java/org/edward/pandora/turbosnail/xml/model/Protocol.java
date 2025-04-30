@@ -1,18 +1,20 @@
 package org.edward.pandora.turbosnail.xml.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Protocol extends Element {
-    private List<Segment> segmentList;
+    private List<Element> elementList;
+    private Set<String> cacheSet = new HashSet<>();
     private Map<String, String> cache = new HashMap<>();
 
-    public List<Segment> getSegmentList() {
-        return this.segmentList;
+    public List<Element> getElementList() {
+        return elementList;
     }
-    public void setSegmentList(List<Segment> segmentList) {
-        this.segmentList = segmentList;
+    public void setElementList(List<Element> elementList) {
+        this.elementList = elementList;
+    }
+    public Set<String> getCacheSet() {
+        return cacheSet;
     }
     public Map<String, String> getCache() {
         return cache;

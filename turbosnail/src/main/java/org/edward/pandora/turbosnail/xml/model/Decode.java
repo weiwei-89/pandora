@@ -164,7 +164,7 @@ public class Decode extends Element {
             if(protocol.getCache().containsKey(protocolReference)) {
                 return protocol.getCache().get(protocolReference);
             }
-            throw new Exception("finding protocol name failed");
+            throw new Exception(String.format("finding protocol name failed [protocol:%s]", protocolReference));
         } else {
             return this.value;
         }

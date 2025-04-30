@@ -37,6 +37,8 @@ public class Position extends Element {
                 if(protocol.getCache().containsKey(operator)) {
                     String operatorValue = protocol.getCache().get(operator);
                     jexlContext.set(operator, operatorValue);
+                } else {
+                    throw new Exception(String.format("finding operator value failed [operator:%s]", operator));
                 }
             }
             JexlEngine jexlEngine = new JexlBuilder().create();

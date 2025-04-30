@@ -32,35 +32,76 @@ public class ProtocolDecoder {
 
     private Info decode(Data data, Protocol protocol) throws Exception {
         logger.info("decoding protocol [protocol_id:{}]......", protocol.getId());
-        List<Segment> segmentList = protocol.getSegmentList();
-        if(segmentList==null || segmentList.size()==0) {
+        List<Element> elementList = protocol.getElementList();
+        if(elementList==null || elementList.size()==0) {
             return null;
         }
-        Info info = new Info(segmentList.size());
-        for(int i=0; i<segmentList.size(); i++) {
-            Segment segment = segmentList.get(i);
-            if(segment.isMulti()) {
-                int count = segment.getCount();
-                if(count > 0) {
-                    List<Object> infoList = new ArrayList<>(count);
-                    for(int j=0; j<count; j++) {
-                        infoList.add(this.decode(data, segment));
+        Info info = new Info();
+        for(int i=0; i<elementList.size(); i++) {
+            Element element = elementList.get(i);
+            if(element instanceof Segment) {
+                Segment segment = (Segment) element;
+                if(segment.isMulti()) {
+                    int count = segment.getCount();
+                    if(count > 0) {
+                        List<Object> infoList = new ArrayList<>(count);
+                        for(int c=0; c<count; c++) {
+                            infoList.add(this.decode(data, segment));
+                        }
+                        info.put(segment.getId(), infoList);
+                    } else {
+                        List<Object> infoList = new ArrayList<>();
+                        while(data.readable()) {
+                            try {
+                                infoList.add(this.decode(data, segment));
+                            } catch(Exception e) {
+                                logger.error("decoding error", e);
+                                break;
+                            }
+                        }
+                        info.put(segment.getId(), infoList);
                     }
-                    info.put(segmentList.get(i).getId(), infoList);
                 } else {
-                    List<Object> infoList = new ArrayList<>();
+                    info.put(segment.getId(), this.decode(data, segment));
+                }
+            } else if(element instanceof Multi) {
+                Multi multi = (Multi) element;
+                List<Segment> segmentList = multi.getSegmentList();
+                if(segmentList==null || segmentList.size()==0) {
+                    continue;
+                }
+                int count = multi.getCount();
+                if(count > 0) {
+                    List<Object> subInfoList = new ArrayList<>(count);
+                    for(int c=0; c<count; c++) {
+                        Info subInfo = new Info(segmentList.size());
+                        for(int s=0; s<segmentList.size(); s++) {
+                            Segment segment = segmentList.get(s);
+                            subInfo.put(segment.getId(), this.decode(data, segment));
+                        }
+                        subInfoList.add(subInfo);
+                    }
+                    info.put(multi.getId(), subInfoList);
+                } else {
+                    List<Object> subInfoList = new ArrayList<>();
                     while(data.readable()) {
                         try {
-                            infoList.add(this.decode(data, segment));
+                            Info subInfo = new Info(segmentList.size());
+                            for(int s=0; s<segmentList.size(); s++) {
+                                Segment segment = segmentList.get(s);
+                                subInfo.put(segment.getId(), this.decode(data, segment));
+                            }
+                            subInfoList.add(subInfo);
                         } catch(Exception e) {
                             logger.error("decoding error", e);
                             break;
                         }
                     }
-                    info.put(segmentList.get(i).getId(), infoList);
+                    info.put(multi.getId(), subInfoList);
                 }
             } else {
-                info.put(segmentList.get(i).getId(), this.decode(data, segment));
+                logger.warn("skipping unknown element \"{}\"", element.getId());
+                continue;
             }
         }
         return info;
@@ -95,8 +136,9 @@ public class ProtocolDecoder {
         String value = decode.decode(partBytes);
         logger.info("value: {}", value);
         Protocol protocol = (Protocol) segment.getProtocol();
-        if(protocol.getCache().containsKey(segment.getId())) {
-            protocol.getCache().put(segment.getId(), value);
+        String segmentCode = Segment.generateUniqueCode(segment);
+        if(protocol.getCacheSet().contains(segmentCode)) {
+            protocol.getCache().put(segmentCode, value);
         }
         return value;
     }
