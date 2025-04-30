@@ -41,29 +41,7 @@ public class ProtocolDecoder {
             Element element = elementList.get(i);
             if(element instanceof Segment) {
                 Segment segment = (Segment) element;
-                if(segment.isMulti()) {
-                    int count = segment.getCount();
-                    if(count > 0) {
-                        List<Object> infoList = new ArrayList<>(count);
-                        for(int c=0; c<count; c++) {
-                            infoList.add(this.decode(data, segment));
-                        }
-                        info.put(segment.getId(), infoList);
-                    } else {
-                        List<Object> infoList = new ArrayList<>();
-                        while(data.readable()) {
-                            try {
-                                infoList.add(this.decode(data, segment));
-                            } catch(Exception e) {
-                                logger.error("decoding error", e);
-                                break;
-                            }
-                        }
-                        info.put(segment.getId(), infoList);
-                    }
-                } else {
-                    info.put(segment.getId(), this.decode(data, segment));
-                }
+                info.put(segment.getId(), this.decode(data, segment));
             } else if(element instanceof Multi) {
                 Multi multi = (Multi) element;
                 List<Segment> segmentList = multi.getSegmentList();
@@ -109,6 +87,27 @@ public class ProtocolDecoder {
 
     private Object decode(Data data, Segment segment) throws Exception {
         logger.info("decoding segment [segment_id:{}]......", segment.getId());
+        if(segment.isMulti()) {
+            int count = segment.getCount();
+            if(count > 0) {
+                List<Object> infoList = new ArrayList<>(count);
+                for(int c=0; c<count; c++) {
+                    infoList.add(this.decode(data, segment));
+                }
+                return infoList;
+            } else {
+                List<Object> infoList = new ArrayList<>();
+                while(data.readable()) {
+                    try {
+                        infoList.add(this.decode(data, segment));
+                    } catch(Exception e) {
+                        logger.error("decoding error", e);
+                        break;
+                    }
+                }
+                return infoList;
+            }
+        }
         Decode decode = segment.getDecode();
         if(decode == null) {
             throw new Exception("there's not a decode element");
