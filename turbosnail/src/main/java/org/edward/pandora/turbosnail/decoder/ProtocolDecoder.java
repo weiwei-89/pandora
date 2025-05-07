@@ -88,18 +88,21 @@ public class ProtocolDecoder {
     private Object decode(Data data, Segment segment) throws Exception {
         logger.info("decoding segment [segment_id:{}]......", segment.getId());
         if(segment.isMulti()) {
+            Segment segmentReplica = new Segment();
+            segment.copy(segmentReplica);
+            segmentReplica.setMulti(false);
             int count = segment.getCount();
             if(count > 0) {
                 List<Object> infoList = new ArrayList<>(count);
                 for(int c=0; c<count; c++) {
-                    infoList.add(this.decode(data, segment));
+                    infoList.add(this.decode(data, segmentReplica));
                 }
                 return infoList;
             } else {
                 List<Object> infoList = new ArrayList<>();
                 while(data.readable()) {
                     try {
-                        infoList.add(this.decode(data, segment));
+                        infoList.add(this.decode(data, segmentReplica));
                     } catch(Exception e) {
                         logger.error("decoding error", e);
                         break;

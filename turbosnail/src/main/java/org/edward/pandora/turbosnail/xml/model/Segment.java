@@ -65,4 +65,15 @@ public class Segment extends Element {
     public static String generateUniqueCode(String protocolId, String segmentId) {
         return String.format("%s.%s", protocolId, segmentId);
     }
+
+    public void copy(Segment segment) {
+        super.copy(segment);
+        segment.position = this.position;
+        segment.decode = this.decode;
+        segment.options = this.options;
+        segment.optionList = this.optionList;
+        segment.skip = this.skip;
+        segment.multi = this.multi;
+        segment.count = this.count;
+    }
 }

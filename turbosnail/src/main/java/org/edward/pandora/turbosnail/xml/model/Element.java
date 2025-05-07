@@ -37,4 +37,12 @@ public class Element {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public void copy(Element element) {
+        element.protocol = this.protocol;
+        element.parent = this.parent;
+        element.id = this.id;
+        element.name = this.name;
+        element.description = this.description;
+    }
 }
