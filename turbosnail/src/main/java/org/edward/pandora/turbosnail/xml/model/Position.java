@@ -34,8 +34,9 @@ public class Position extends Element {
             Protocol protocol = (Protocol) this.getProtocol();
             for(int i=0; i<operators.length; i++) {
                 String operator = operators[i];
-                if(protocol.getCache().containsKey(operator)) {
-                    String operatorValue = protocol.getCache().get(operator);
+                String operatorCode = this.convertUniqueCode(operator);
+                if(protocol.getCache().containsKey(operatorCode)) {
+                    String operatorValue = protocol.getCache().get(operatorCode);
                     jexlContext.set(operator, operatorValue);
                 } else {
                     throw new Exception(String.format("finding operator value failed [operator:%s]", operator));

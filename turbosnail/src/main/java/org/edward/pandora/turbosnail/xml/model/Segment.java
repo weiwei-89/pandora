@@ -54,18 +54,6 @@ public class Segment extends Element {
         this.count = count;
     }
 
-    public String generateUniqueCode() {
-        return generateUniqueCode(this.getProtocol().getId(), this.getId());
-    }
-
-    public static String generateUniqueCode(Segment segment) {
-        return generateUniqueCode(segment.getProtocol().getId(), segment.getId());
-    }
-
-    public static String generateUniqueCode(String protocolId, String segmentId) {
-        return String.format("%s.%s", protocolId, segmentId);
-    }
-
     public void copy(Segment segment) {
         super.copy(segment);
         segment.position = this.position;

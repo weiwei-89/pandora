@@ -161,8 +161,9 @@ public class Decode extends Element {
         if(Property.isReference(this.value)) {
             Protocol protocol = (Protocol) this.getProtocol();
             String protocolReference = Property.extractReference(this.value);
-            if(protocol.getCache().containsKey(protocolReference)) {
-                return protocol.getCache().get(protocolReference);
+            String protocolReferenceCode = this.convertUniqueCode(protocolReference);
+            if(protocol.getCache().containsKey(protocolReferenceCode)) {
+                return protocol.getCache().get(protocolReferenceCode);
             }
             throw new Exception(String.format("finding protocol name failed [protocol:%s]", protocolReference));
         } else {

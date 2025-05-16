@@ -138,9 +138,9 @@ public class ProtocolDecoder {
         String value = decode.decode(partBytes);
         logger.info("value: {}", value);
         Protocol protocol = (Protocol) segment.getProtocol();
-        String segmentCode = Segment.generateUniqueCode(segment);
-        if(protocol.getCacheSet().contains(segmentCode)) {
-            protocol.getCache().put(segmentCode, value);
+        String elementCode = Element.generateUniqueCode(segment);
+        if(protocol.getCacheSet().contains(elementCode)) {
+            protocol.getCache().put(elementCode, value);
         }
         return value;
     }

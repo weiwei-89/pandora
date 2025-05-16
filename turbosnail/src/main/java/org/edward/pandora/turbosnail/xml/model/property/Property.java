@@ -5,6 +5,7 @@ import java.util.Arrays;
 public class Property {
     private static final String FORMULA_PREFIX = "$";
     private static final String REFERENCE_PREFIX = "@";
+    public static final String SEPARATOR = ".";
 
     private String value;
 

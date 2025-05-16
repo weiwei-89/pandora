@@ -77,7 +77,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
                 this.currentPosition.setLengthFormula(lengthFormula);
                 String[] operators = Property.extractOperators(lengthFormula);
                 for(String operator : operators) {
-                    this.protocol.getCacheSet().add(operator);
+                    this.protocol.getCacheSet().add(this.currentPosition.convertUniqueCode(operator));
                 }
             } else {
                 this.currentPosition.setLength(Integer.parseInt(length));
@@ -97,7 +97,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
             this.currentDecode.setValue(value);
             if(StringUtils.isNotBlank(value) && Property.isReference(value)) {
                 String valueReference = Property.extractReference(value);
-                this.protocol.getCacheSet().add(valueReference);
+                this.protocol.getCacheSet().add(this.currentDecode.convertUniqueCode(valueReference));
             }
             this.currentDecode.setProtocol(Boolean.parseBoolean(attributes.getValue("protocol")));
         } else if("options".equalsIgnoreCase(qName)) {

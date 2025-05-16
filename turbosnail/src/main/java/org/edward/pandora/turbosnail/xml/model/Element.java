@@ -1,5 +1,7 @@
 package org.edward.pandora.turbosnail.xml.model;
 
+import org.edward.pandora.turbosnail.xml.model.property.Property;
+
 public class Element {
     private Element protocol;
     private Element parent;
@@ -36,6 +38,25 @@ public class Element {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String generateUniqueCode() {
+        return generateUniqueCode(this.getProtocol().getId(), this.getId());
+    }
+
+    public static String generateUniqueCode(Element element) {
+        return generateUniqueCode(element.getProtocol().getId(), element.getId());
+    }
+
+    private static String generateUniqueCode(String protocolId, String elementId) {
+        return String.format("%s%s%s", protocolId, Property.SEPARATOR, elementId);
+    }
+
+    public String convertUniqueCode(String code) {
+        if(code.contains(Property.SEPARATOR)) {
+            return code;
+        }
+        return generateUniqueCode(this.getProtocol().getId(), code);
     }
 
     public void copy(Element element) {
