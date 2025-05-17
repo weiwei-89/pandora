@@ -15,6 +15,7 @@ public class Decode extends Element {
     private Process process;
     private String value;
     private boolean protocol = false;
+    private boolean ignoreCase = false;
 
     public Type getType() {
         return this.type;
@@ -39,6 +40,12 @@ public class Decode extends Element {
     }
     public void setProtocol(boolean protocol) {
         this.protocol = protocol;
+    }
+    public boolean isIgnoreCase() {
+        return ignoreCase;
+    }
+    public void setIgnoreCase(boolean ignoreCase) {
+        this.ignoreCase = ignoreCase;
     }
 
     public enum Type {
@@ -130,7 +137,13 @@ public class Decode extends Element {
 
     private void process(String value0, Value out) throws Exception {
         if(this.process == Decode.Process.EQUATION) {
-            if(value0.equals(this.value)) {
+            String currentValue = value0;
+            String decodeValue = this.value;
+            if(this.ignoreCase) {
+                currentValue = value0.toLowerCase();
+                decodeValue = this.value.toLowerCase();
+            }
+            if(currentValue.equals(decodeValue)) {
                 out.setContent(value0);
                 return;
             }
@@ -145,11 +158,27 @@ public class Decode extends Element {
             if(optionList==null || optionList.size()==0) {
                 throw new Exception("there are no any option elements");
             }
+            String currentValue = value0;
+            if(this.ignoreCase) {
+                currentValue = value0.toLowerCase();
+            }
             for(int i=0; i<optionList.size(); i++) {
                 Option option = optionList.get(i);
-                if(value0.equals(option.getCode())) {
-                    out.setContent(option.getValue());
-                    return;
+                if(option.isRange()) {
+                    int value0IntValue = Integer.parseInt(value0, 16);
+                    if(value0IntValue>=option.getMin() && value0IntValue<=option.getMax()) {
+                        out.setContent(option.getValue());
+                        return;
+                    }
+                } else {
+                    String optionValue = option.getCode();
+                    if(this.ignoreCase) {
+                        optionValue = option.getCode().toLowerCase();
+                    }
+                    if(currentValue.equals(optionValue)) {
+                        out.setContent(option.getValue());
+                        return;
+                    }
                 }
             }
             throw new Exception("there is not a matched element");

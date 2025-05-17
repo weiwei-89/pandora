@@ -1,12 +1,15 @@
 package org.edward.pandora.turbosnail.xml.model;
 
-import org.apache.commons.jexl3.*;
-import org.edward.pandora.turbosnail.xml.model.property.Property;
+import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
 
 public class Position extends Element {
     private int length;
     private boolean variableLength = false;
     private String lengthFormula;
+    private String[] operators;
+    private JexlExpression jexlExpression;
 
     public int getLength() {
         return this.length;
@@ -26,14 +29,25 @@ public class Position extends Element {
     public void setLengthFormula(String lengthFormula) {
         this.lengthFormula = lengthFormula;
     }
+    public String[] getOperators() {
+        return this.operators;
+    }
+    public void setOperators(String[] operators) {
+        this.operators = operators;
+    }
+    public JexlExpression getJexlExpression() {
+        return this.jexlExpression;
+    }
+    public void setJexlExpression(JexlExpression jexlExpression) {
+        this.jexlExpression = jexlExpression;
+    }
 
     public void analyzeLength() throws Exception {
         if(this.variableLength) {
             JexlContext jexlContext = new MapContext();
-            String[] operators = Property.extractOperators(this.lengthFormula);
             Protocol protocol = (Protocol) this.getProtocol();
-            for(int i=0; i<operators.length; i++) {
-                String operator = operators[i];
+            for(int i=0; i<this.operators.length; i++) {
+                String operator = this.operators[i];
                 String operatorCode = this.convertUniqueCode(operator);
                 if(protocol.getCache().containsKey(operatorCode)) {
                     String operatorValue = protocol.getCache().get(operatorCode);
@@ -42,9 +56,7 @@ public class Position extends Element {
                     throw new Exception(String.format("finding operator value failed [operator:%s]", operator));
                 }
             }
-            JexlEngine jexlEngine = new JexlBuilder().create();
-            JexlExpression jexlExpression = jexlEngine.createExpression(this.lengthFormula);
-            Object result = jexlExpression.evaluate(jexlContext);
+            Object result = this.jexlExpression.evaluate(jexlContext);
             this.length = Integer.parseInt(result.toString());
         }
         if(this.length < 0) {

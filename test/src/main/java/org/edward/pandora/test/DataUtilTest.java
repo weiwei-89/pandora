@@ -10,8 +10,10 @@ import java.util.Arrays;
 
 public class DataUtilTest {
     public static void main(String[] args) throws Exception {
-        String cc = "7f";
-//        byte[] dd = DataUtil.hexToBytes(cc);
+        String cc = "FE";
+        byte[] dd = DataUtil.hexToBytes(cc);
+        String ee = DataUtil.toHexString(dd);
+        System.out.println("ee: " + ee);
         int total = Integer.parseInt(cc, 16);
         System.out.println("total: " + total);
         String exp = "2*3+(5-9)/2";

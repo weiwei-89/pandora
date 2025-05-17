@@ -1,5 +1,8 @@
 package org.edward.pandora.turbosnail.xml;
 
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.lang3.StringUtils;
 import org.edward.pandora.turbosnail.xml.model.property.Property;
 import org.edward.pandora.turbosnail.xml.model.*;
@@ -13,6 +16,11 @@ import java.util.ArrayList;
 
 public class ProtocolXmlHandler extends DefaultHandler {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolXmlHandler.class);
+    private static final JexlEngine jexlEngine;
+
+    static {
+        jexlEngine = new JexlBuilder().create();
+    }
 
     private final Protocol protocol;
 
@@ -76,9 +84,15 @@ public class ProtocolXmlHandler extends DefaultHandler {
                 String lengthFormula = Property.extractFormula(length);
                 this.currentPosition.setLengthFormula(lengthFormula);
                 String[] operators = Property.extractOperators(lengthFormula);
+                if(operators==null || operators.length==0) {
+                    throw new SAXException("there are no operators in formula");
+                }
+                this.currentPosition.setOperators(operators);
                 for(String operator : operators) {
                     this.protocol.getCacheSet().add(this.currentPosition.convertUniqueCode(operator));
                 }
+                JexlExpression jexlExpression = jexlEngine.createExpression(lengthFormula);
+                this.currentPosition.setJexlExpression(jexlExpression);
             } else {
                 this.currentPosition.setLength(Integer.parseInt(length));
             }
@@ -100,6 +114,7 @@ public class ProtocolXmlHandler extends DefaultHandler {
                 this.protocol.getCacheSet().add(this.currentDecode.convertUniqueCode(valueReference));
             }
             this.currentDecode.setProtocol(Boolean.parseBoolean(attributes.getValue("protocol")));
+            this.currentDecode.setIgnoreCase(Boolean.parseBoolean(attributes.getValue("ignore_case")));
         } else if("options".equalsIgnoreCase(qName)) {
             String id = attributes.getValue("id");
             logger.info("reading options element [id:{}]", id);
