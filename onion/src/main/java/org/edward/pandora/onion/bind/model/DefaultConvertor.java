@@ -1,5 +1,5 @@
 package org.edward.pandora.onion.bind.model;
 
-public enum CONVERT {
+public enum DefaultConvertor {
     DO_NOTHING;
 }

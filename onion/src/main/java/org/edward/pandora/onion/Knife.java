@@ -109,7 +109,7 @@ public class Knife {
                         EnumInstance enumInstance = Box.readEnumInstance(targetCut.convertDefinition());
                         if(enumInstance!=null && !enumInstance.isEmpty()) {
                             enumInfoList = new ArrayList<>(enumInstance.size());
-                            for(Map.Entry<String, Enum> entry : enumInstance.entrySet()) {
+                            for(Map.Entry<String, Enum<?>> entry : enumInstance.entrySet()) {
                                 EnumInfo enumInfo = Box.getEnumInfo(entry.getValue());
                                 if(enumInfo!=null && !enumInfo.isEmpty()) {
                                     enumInfoList.add(enumInfo);

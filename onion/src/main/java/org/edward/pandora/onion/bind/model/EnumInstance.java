@@ -2,7 +2,7 @@ package org.edward.pandora.onion.bind.model;
 
 import java.util.HashMap;
 
-public class EnumInstance extends HashMap<String, Enum> {
+public class EnumInstance extends HashMap<String, Enum<?>> {
     public EnumInstance() {
 
     }

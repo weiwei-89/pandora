@@ -1,6 +1,6 @@
 package org.edward.pandora.onion.bind.annotation;
 
-import org.edward.pandora.onion.bind.model.CONVERT;
+import org.edward.pandora.onion.bind.model.DefaultConvertor;
 
 import java.lang.annotation.*;
 
@@ -36,7 +36,7 @@ public @interface Cut {
      * 转换定义
      * @return
      */
-    Class<? extends Enum> convertDefinition() default CONVERT.class;
+    Class<? extends Enum<?>> convertDefinition() default DefaultConvertor.class;
 
     /**
      * 转换的key

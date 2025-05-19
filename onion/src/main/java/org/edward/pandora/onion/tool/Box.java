@@ -47,12 +47,12 @@ public class Box {
                 continue;
             }
             targetField.setAccessible(true);
-            enumInstance.put(targetField.getName(), (Enum)targetField.get(targetClass));
+            enumInstance.put(targetField.getName(), (Enum<?>)targetField.get(targetClass));
         }
         return enumInstance;
     }
 
-    public static EnumInfo getEnumInfo(Enum target) throws Exception {
+    public static EnumInfo getEnumInfo(Enum<?> target) throws Exception {
         if(target == null) {
             return null;
         }
@@ -64,8 +64,8 @@ public class Box {
         for(Field targetField : targetFields) {
             targetField.setAccessible(true);
             Object targetFieldValue = targetField.get(target);
-            if(targetFieldValue instanceof String) {
-                enumInfo.put(targetField.getName(), (String)targetFieldValue);
+            if(isPrimitive(targetFieldValue)) {
+                enumInfo.put(targetField.getName(), String.valueOf(targetFieldValue));
             }
         }
         return enumInfo;
