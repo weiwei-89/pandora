@@ -8,7 +8,7 @@
         <artifactId>pandora-dependency</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>test</artifactId>
+    <artifactId>monkey</artifactId>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -19,29 +19,6 @@
             <groupId>org.edward.pandora</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.edward.pandora</groupId>
-            <artifactId>onion</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.edward.pandora</groupId>
-            <artifactId>turbosnail</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.edward.pandora</groupId>
-            <artifactId>queen</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -72,11 +49,6 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.edward.pandora.test.TcpServerTest</mainClass>
-                        </manifest>
-                    </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>

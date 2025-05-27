@@ -13,6 +13,7 @@
         <module>turbosnail</module>
         <module>bee</module>
         <module>queen</module>
+        <module>monkey</module>
         <module>test</module>
     </modules>
     <properties>
