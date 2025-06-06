@@ -1,4 +1,4 @@
-import org.edward.pandora.monkey.model.Lexer;
+import org.edward.pandora.monkey.Lexer;
 import org.edward.pandora.monkey.model.Token;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;

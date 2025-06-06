@@ -1,6 +1,7 @@
-package org.edward.pandora.monkey.model;
+package org.edward.pandora.monkey;
 
 import org.edward.pandora.monkey.exception.EndOfLineException;
+import org.edward.pandora.monkey.model.Token;
 
 public class Lexer {
     private final String input;
