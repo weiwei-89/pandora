@@ -1,7 +1,15 @@
-package org.edward.pandora.monkey.model;
+package org.edward.pandora.monkey.model.statement;
+
+import org.edward.pandora.monkey.model.Expression;
+import org.edward.pandora.monkey.model.Statement;
+import org.edward.pandora.monkey.model.Token;
 
 public class ReturnStatement implements Statement {
-    private final Token token = new Token(Token.Keywords.RETURN.getLiteral(), Token.Keywords.RETURN.getType());
+    private final Token token;
+
+    public ReturnStatement(Token token) {
+        this.token = token;
+    }
 
     public Token getToken() {
         return token;
@@ -29,7 +37,7 @@ public class ReturnStatement implements Statement {
     @Override
     public String string() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.tokenLiteral());
+        sb.append("return");
         sb.append(" ");
         sb.append(this.value.string());
         return sb.toString();

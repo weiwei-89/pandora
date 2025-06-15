@@ -1,19 +1,28 @@
-package org.edward.pandora.monkey.model;
+package org.edward.pandora.monkey.model.statement;
+
+import org.edward.pandora.monkey.model.Expression;
+import org.edward.pandora.monkey.model.expression.IdentifierExpression;
+import org.edward.pandora.monkey.model.Statement;
+import org.edward.pandora.monkey.model.Token;
 
 public class LetStatement implements Statement {
-    private final Token token = new Token(Token.Keywords.LET.getLiteral(), Token.Keywords.LET.getType());
+    private final Token token;
+
+    public LetStatement(Token token) {
+        this.token = token;
+    }
 
     public Token getToken() {
         return token;
     }
 
-    private Identifier name;
+    private IdentifierExpression name;
     private Expression value;
 
-    public Identifier getName() {
+    public IdentifierExpression getName() {
         return name;
     }
-    public void setName(Identifier name) {
+    public void setName(IdentifierExpression name) {
         this.name = name;
     }
     public Expression getValue() {
@@ -36,10 +45,12 @@ public class LetStatement implements Statement {
     @Override
     public String string() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.tokenLiteral());
+        sb.append("let");
         sb.append(" ");
         sb.append(this.name.string());
-        sb.append(" = ");
+        sb.append(" ");
+        sb.append("=");
+        sb.append(" ");
         sb.append(this.value.string());
         return sb.toString();
     }

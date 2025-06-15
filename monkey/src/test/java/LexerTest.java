@@ -11,6 +11,7 @@ public class LexerTest {
         sb.append("let five = 5;").append("\n");
         sb.append("let ten = 10;").append("\n");
         sb.append("let add = fn(x, y) { x+y; };").append("\n");
+        sb.append("5 + 5;").append("\n");
         Lexer lexer = new Lexer(sb.toString());
         while(true) {
             Token token = lexer.nextToken();

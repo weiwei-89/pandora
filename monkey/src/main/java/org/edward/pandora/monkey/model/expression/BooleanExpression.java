@@ -1,9 +1,12 @@
-package org.edward.pandora.monkey.model;
+package org.edward.pandora.monkey.model.expression;
 
-public class IntegerLiteral implements Expression {
+import org.edward.pandora.monkey.model.Expression;
+import org.edward.pandora.monkey.model.Token;
+
+public class BooleanExpression implements Expression {
     private final Token token;
 
-    public IntegerLiteral(Token token) {
+    public BooleanExpression(Token token) {
         this.token = token;
     }
 
@@ -11,12 +14,12 @@ public class IntegerLiteral implements Expression {
         return token;
     }
 
-    private int value;
+    private boolean value;
 
-    public int getValue() {
+    public boolean isValue() {
         return value;
     }
-    public void setValue(int value) {
+    public void setValue(boolean value) {
         this.value = value;
     }
 

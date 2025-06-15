@@ -1,4 +1,8 @@
-package org.edward.pandora.monkey.model;
+package org.edward.pandora.monkey.model.statement;
+
+import org.edward.pandora.monkey.model.Expression;
+import org.edward.pandora.monkey.model.Statement;
+import org.edward.pandora.monkey.model.Token;
 
 public class ExpressionStatement implements Statement {
     private final Token token;

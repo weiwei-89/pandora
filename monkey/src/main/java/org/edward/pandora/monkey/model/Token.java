@@ -44,8 +44,7 @@ public class Token {
 
         FUNCTION("function"),
         LET("let"),
-        TRUE("true"),
-        FALSE("false"),
+        BOOLEAN("boolean"),
         IF("if"),
         ELSE("else"),
         RETURN("return");
@@ -73,8 +72,8 @@ public class Token {
     public enum Keywords {
         FN("fn", Type.FUNCTION),
         LET("let", Type.LET),
-        TRUE("true", Type.TRUE),
-        FALSE("false", Type.FALSE),
+        TRUE("true", Type.BOOLEAN),
+        FALSE("false", Type.BOOLEAN),
         IF("if", Type.IF),
         ELSE("else", Type.ELSE),
         RETURN("return", Type.RETURN);

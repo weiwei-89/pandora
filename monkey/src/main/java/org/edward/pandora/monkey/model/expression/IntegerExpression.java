@@ -1,9 +1,12 @@
-package org.edward.pandora.monkey.model;
+package org.edward.pandora.monkey.model.expression;
 
-public class Identifier implements Expression {
+import org.edward.pandora.monkey.model.Expression;
+import org.edward.pandora.monkey.model.Token;
+
+public class IntegerExpression implements Expression {
     private final Token token;
 
-    public Identifier(Token token) {
+    public IntegerExpression(Token token) {
         this.token = token;
     }
 
@@ -11,12 +14,12 @@ public class Identifier implements Expression {
         return token;
     }
 
-    private String value;
+    private int value;
 
-    public String getValue() {
+    public int getValue() {
         return value;
     }
-    public void setValue(String value) {
+    public void setValue(int value) {
         this.value = value;
     }
 
@@ -32,6 +35,6 @@ public class Identifier implements Expression {
 
     @Override
     public String string() {
-        return this.value;
+        return String.valueOf(this.value);
     }
 }

@@ -4,10 +4,13 @@ import org.edward.pandora.monkey.exception.ParseException;
 import org.edward.pandora.monkey.function.InfixParseFunction;
 import org.edward.pandora.monkey.function.PrefixParseFunction;
 import org.edward.pandora.monkey.model.*;
+import org.edward.pandora.monkey.model.expression.*;
+import org.edward.pandora.monkey.model.statement.BlockStatement;
+import org.edward.pandora.monkey.model.statement.ExpressionStatement;
+import org.edward.pandora.monkey.model.statement.LetStatement;
+import org.edward.pandora.monkey.model.statement.ReturnStatement;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Parser {
@@ -23,6 +26,20 @@ public class Parser {
     private void registerFunction() {
         this.prefixParseFunctionMap.put(Token.Type.IDENT, this::parseIdentifier);
         this.prefixParseFunctionMap.put(Token.Type.INT, this::parseIntegerLiteral);
+        this.prefixParseFunctionMap.put(Token.Type.BOOLEAN, this::parseBoolean);
+        this.prefixParseFunctionMap.put(Token.Type.BANG, this::parsePrefixExpression);
+        this.prefixParseFunctionMap.put(Token.Type.PLUS, this::parsePrefixExpression);
+        this.prefixParseFunctionMap.put(Token.Type.MINUS, this::parsePrefixExpression);
+        this.prefixParseFunctionMap.put(Token.Type.LPAREN, this::parseGroupedExpression);
+        this.prefixParseFunctionMap.put(Token.Type.IF, this::parseIfExpression);
+        this.infixParseFunctionMap.put(Token.Type.EQ, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.NOT_EQ, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.LT, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.GT, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.PLUS, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.MINUS, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.ASTERISK, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.SLASH, this::parseInfixExpression);
     }
 
     public enum Priority {
@@ -37,6 +54,41 @@ public class Parser {
 
         public int getValue() {
             return this.ordinal();
+        }
+    }
+
+    public enum TokenPriority {
+        EQ(Token.Type.EQ, Priority.EQUALS),
+        NOT_EQ(Token.Type.NOT_EQ, Priority.EQUALS),
+        LT(Token.Type.LT, Priority.LESSGREATER),
+        GT(Token.Type.GT, Priority.LESSGREATER),
+        PLUS(Token.Type.PLUS, Priority.SUM),
+        MINUS(Token.Type.MINUS, Priority.SUM),
+        ASTERISK(Token.Type.ASTERISK, Priority.PRODUCT),
+        SLASH(Token.Type.SLASH, Priority.PRODUCT);
+
+        private final Token.Type tokenType;
+        private final Priority priority;
+
+        TokenPriority(Token.Type tokenType, Priority priority) {
+            this.tokenType = tokenType;
+            this.priority = priority;
+        }
+
+        public Token.Type getTokenType() {
+            return tokenType;
+        }
+        public Priority getPriority() {
+            return priority;
+        }
+
+        public static TokenPriority get(Token.Type tokenType) {
+            for(TokenPriority tokenPriority : TokenPriority.values()) {
+                if(tokenPriority.getTokenType() == tokenType) {
+                    return tokenPriority;
+                }
+            }
+            return null;
         }
     }
 
@@ -87,12 +139,12 @@ public class Parser {
     }
 
     private LetStatement parseLetStatement() throws Exception {
-        LetStatement letStatement = new LetStatement();
+        LetStatement letStatement = new LetStatement(this.currentToken);
         this.expect(Token.Type.IDENT);
         this.go();
-        Identifier identifier = new Identifier(this.currentToken);
-        identifier.setValue(this.currentToken.getLiteral());
-        letStatement.setName(identifier);
+        IdentifierExpression identifierExpression = new IdentifierExpression(this.currentToken);
+        identifierExpression.setValue(this.currentToken.getLiteral());
+        letStatement.setName(identifierExpression);
         this.expect(Token.Type.ASSIGN);
         this.go();
         this.go();
@@ -101,7 +153,7 @@ public class Parser {
     }
 
     private ReturnStatement parseReturnStatement() throws Exception {
-        ReturnStatement returnStatement = new ReturnStatement();
+        ReturnStatement returnStatement = new ReturnStatement(this.currentToken);
         this.go();
         returnStatement.setValue(this.parseExpression(Priority.LOWEST.getValue()));
         return returnStatement;
@@ -120,18 +172,108 @@ public class Parser {
                     String.format("there is no prefix parsing function for \"%s\"", this.currentToken.getLiteral()));
         }
         Expression leftExpression = prefixParseFunction.apply();
+        while(true) {
+            if(this.nextToken.getType() == Token.Type.SEMICOLON) {
+                break;
+            }
+            TokenPriority nextTokenPriority = TokenPriority.get(this.nextToken.getType());
+            if(nextTokenPriority == null) {
+                break;
+            }
+            if(priority >= nextTokenPriority.getPriority().getValue()) {
+                break;
+            }
+            InfixParseFunction infixParseFunction = this.infixParseFunctionMap.get(this.nextToken.getType());
+            if(infixParseFunction == null) {
+                throw new ParseException(
+                        String.format("there is no infix parsing function for \"%s\"", this.nextToken.getLiteral()));
+            }
+            this.go();
+            leftExpression = infixParseFunction.apply(leftExpression);
+        }
         return leftExpression;
     }
 
     private Expression parseIdentifier() throws Exception {
-        Identifier identifier = new Identifier(this.currentToken);
-        identifier.setValue(this.currentToken.getLiteral());
-        return identifier;
+        IdentifierExpression identifierExpression = new IdentifierExpression(this.currentToken);
+        identifierExpression.setValue(this.currentToken.getLiteral());
+        return identifierExpression;
     }
 
     private Expression parseIntegerLiteral() throws Exception {
-        IntegerLiteral integerLiteral = new IntegerLiteral(this.currentToken);
-        integerLiteral.setValue(Integer.parseInt(this.currentToken.getLiteral()));
-        return integerLiteral;
+        IntegerExpression integerExpression = new IntegerExpression(this.currentToken);
+        integerExpression.setValue(Integer.parseInt(this.currentToken.getLiteral()));
+        return integerExpression;
+    }
+
+    private Expression parseBoolean() throws Exception {
+        BooleanExpression booleanExpression = new BooleanExpression(this.currentToken);
+        booleanExpression.setValue(Boolean.parseBoolean(this.currentToken.getLiteral()));
+        return booleanExpression;
+    }
+
+    private Expression parsePrefixExpression() throws Exception {
+        PrefixExpression prefixExpression = new PrefixExpression(this.currentToken);
+        prefixExpression.setOperator(this.currentToken.getLiteral());
+        this.go();
+        prefixExpression.setRight(this.parseExpression(Priority.PREFIX.getValue()));
+        return prefixExpression;
+    }
+
+    private Expression parseInfixExpression(Expression left) throws Exception {
+        InfixExpression infixExpression = new InfixExpression(this.currentToken);
+        infixExpression.setLeft(left);
+        infixExpression.setOperator(this.currentToken.getLiteral());
+        TokenPriority currentTokenPriority = TokenPriority.get(this.currentToken.getType());
+        this.go();
+        infixExpression.setRight(this.parseExpression(currentTokenPriority.getPriority().getValue()));
+        return infixExpression;
+    }
+
+    private Expression parseGroupedExpression() throws Exception {
+        this.go();
+        Expression expression = this.parseExpression(Priority.LOWEST.getValue());
+        this.expect(Token.Type.RPAREN);
+        this.go();
+        return expression;
+    }
+
+    private Expression parseIfExpression() throws Exception {
+        IfExpression ifExpression = new IfExpression(this.currentToken);
+        this.expect(Token.Type.LPAREN);
+        this.go();
+        this.go();
+        ifExpression.setCondition(this.parseExpression(Priority.LOWEST.getValue()));
+        this.expect(Token.Type.RPAREN);
+        this.go();
+        this.expect(Token.Type.LBRACE);
+        this.go();
+        ifExpression.setConsequence(this.parseBlockStatement());
+        if(this.nextToken.getType() == Token.Type.ELSE) {
+            this.go();
+            this.expect(Token.Type.LBRACE);
+            this.go();
+            ifExpression.setAlternative(this.parseBlockStatement());
+        }
+        return ifExpression;
+    }
+
+    private BlockStatement parseBlockStatement() throws Exception {
+        BlockStatement blockStatement = new BlockStatement(this.currentToken);
+        while(true) {
+            this.go();
+            if(this.currentToken.getType() == Token.Type.SEMICOLON) {
+                continue;
+            }
+            if(this.currentToken.getType() == Token.Type.RBRACE) {
+                break;
+            }
+            Statement statement = this.parseStatement();
+            if(statement == null) {
+                continue;
+            }
+            blockStatement.addStatement(statement);
+        }
+        return blockStatement;
     }
 }
