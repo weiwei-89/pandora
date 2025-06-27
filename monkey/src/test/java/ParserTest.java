@@ -81,8 +81,9 @@ public class ParserTest {
     @Test
     public void testOperatorPriorityParsing() throws Exception {
         StringBuilder sb = new StringBuilder();
-        sb.append("5 + (3 + 7)").append("\n");
-        sb.append("(5 + 7) * 2").append("\n");
+        sb.append("5 + 2 * 9;").append("\n");
+        sb.append("5 + (3 + 7);").append("\n");
+        sb.append("(5 + 7) * 2;").append("\n");
         Lexer lexer = new Lexer(sb.toString());
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();
@@ -96,6 +97,30 @@ public class ParserTest {
         sb.append("if(true) { 5+(2-6); 7*(9+3); }").append("\n");
         sb.append("if(x < y) { x } else { y }").append("\n");
         sb.append("if(true) { 5+(2-6); 7*(9+3); } else { 6-9; 3+9/2;}").append("\n");
+        Lexer lexer = new Lexer(sb.toString());
+        Parser parser = new Parser(lexer);
+        Program program = parser.parseProgram();
+        System.out.println(program.string());
+    }
+
+    @Test
+    public void testFunctionLiteralParsing() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        sb.append("fn(x) { x; a+b; }").append("\n");
+        sb.append("fn(,,x,) { x; a+b; }").append("\n");
+        sb.append("fn(x, y) { 5+(2-6); 7*(9+3); }").append("\n");
+        Lexer lexer = new Lexer(sb.toString());
+        Parser parser = new Parser(lexer);
+        Program program = parser.parseProgram();
+        System.out.println(program.string());
+    }
+
+    @Test
+    public void testCallExpressionParsing() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        sb.append("add()").append("\n");
+        sb.append("add(1, 2)").append("\n");
+        sb.append("add(1, 2*3, 4+5)").append("\n");
         Lexer lexer = new Lexer(sb.toString());
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();

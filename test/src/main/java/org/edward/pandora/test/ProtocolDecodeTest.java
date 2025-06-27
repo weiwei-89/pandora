@@ -20,6 +20,7 @@ public class ProtocolDecodeTest {
     private static final String PROTOCOL_ID = "gbt32960";
     private static final String DATA_PATH = PATH + File.separator + "测试" + File.separator + "测试数据-实时信息上报-整车数据.txt";
     private static final String[] COMMENT_MARKERS = {"//", "#", "--", "**"};
+    private static final int MAX_LENGTH = 10;
 
     public static void main(String[] args) throws Exception {
         logger.info("loading protocol \"{}\" [{}]", PROTOCOL_ID, PROTOCOL_PATH);
@@ -27,6 +28,7 @@ public class ProtocolDecodeTest {
         Papers papers = ProtocolLoader.build()
                 .setFormat(ProtocolLoader.DEFAULT_FORMAT)
                 .load(path);
+        papers.setMaxLength(MAX_LENGTH);
         BufferedReader reader = new BufferedReader(new FileReader(DATA_PATH));
         StringBuilder sb = new StringBuilder();
         String line = null;

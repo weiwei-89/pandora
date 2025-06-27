@@ -15,4 +15,13 @@ public class Papers extends HashMap<String, Protocol> {
     public String getProtocolId() {
         return this.protocolId;
     }
+
+    private int maxLength;
+
+    public int getMaxLength() {
+        return this.maxLength;
+    }
+    public void setMaxLength(int maxLength) {
+        this.maxLength = maxLength;
+    }
 }

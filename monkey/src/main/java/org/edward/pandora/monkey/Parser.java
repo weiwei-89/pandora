@@ -10,8 +10,7 @@ import org.edward.pandora.monkey.model.statement.ExpressionStatement;
 import org.edward.pandora.monkey.model.statement.LetStatement;
 import org.edward.pandora.monkey.model.statement.ReturnStatement;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Parser {
     private final Lexer lexer;
@@ -32,6 +31,7 @@ public class Parser {
         this.prefixParseFunctionMap.put(Token.Type.MINUS, this::parsePrefixExpression);
         this.prefixParseFunctionMap.put(Token.Type.LPAREN, this::parseGroupedExpression);
         this.prefixParseFunctionMap.put(Token.Type.IF, this::parseIfExpression);
+        this.prefixParseFunctionMap.put(Token.Type.FUNCTION, this::parseFunctionLiteral);
         this.infixParseFunctionMap.put(Token.Type.EQ, this::parseInfixExpression);
         this.infixParseFunctionMap.put(Token.Type.NOT_EQ, this::parseInfixExpression);
         this.infixParseFunctionMap.put(Token.Type.LT, this::parseInfixExpression);
@@ -40,6 +40,7 @@ public class Parser {
         this.infixParseFunctionMap.put(Token.Type.MINUS, this::parseInfixExpression);
         this.infixParseFunctionMap.put(Token.Type.ASTERISK, this::parseInfixExpression);
         this.infixParseFunctionMap.put(Token.Type.SLASH, this::parseInfixExpression);
+        this.infixParseFunctionMap.put(Token.Type.LPAREN, this::parseCallExpression);
     }
 
     public enum Priority {
@@ -65,7 +66,8 @@ public class Parser {
         PLUS(Token.Type.PLUS, Priority.SUM),
         MINUS(Token.Type.MINUS, Priority.SUM),
         ASTERISK(Token.Type.ASTERISK, Priority.PRODUCT),
-        SLASH(Token.Type.SLASH, Priority.PRODUCT);
+        SLASH(Token.Type.SLASH, Priority.PRODUCT),
+        LPAREN(Token.Type.LPAREN, Priority.CALL);
 
         private final Token.Type tokenType;
         private final Priority priority;
@@ -246,12 +248,8 @@ public class Parser {
         ifExpression.setCondition(this.parseExpression(Priority.LOWEST.getValue()));
         this.expect(Token.Type.RPAREN);
         this.go();
-        this.expect(Token.Type.LBRACE);
-        this.go();
         ifExpression.setConsequence(this.parseBlockStatement());
         if(this.nextToken.getType() == Token.Type.ELSE) {
-            this.go();
-            this.expect(Token.Type.LBRACE);
             this.go();
             ifExpression.setAlternative(this.parseBlockStatement());
         }
@@ -259,6 +257,8 @@ public class Parser {
     }
 
     private BlockStatement parseBlockStatement() throws Exception {
+        this.expect(Token.Type.LBRACE);
+        this.go();
         BlockStatement blockStatement = new BlockStatement(this.currentToken);
         while(true) {
             this.go();
@@ -275,5 +275,65 @@ public class Parser {
             blockStatement.addStatement(statement);
         }
         return blockStatement;
+    }
+
+    private Expression parseFunctionLiteral() throws Exception {
+        FunctionLiteralExpression functionLiteralExpression = new FunctionLiteralExpression(this.currentToken);
+        functionLiteralExpression.addParameters(this.parseFunctionParameters());
+        functionLiteralExpression.setBody(this.parseBlockStatement());
+        return functionLiteralExpression;
+    }
+
+    private List<IdentifierExpression> parseFunctionParameters() throws Exception {
+        this.expect(Token.Type.LPAREN);
+        this.go();
+        if(this.nextToken.getType() == Token.Type.RPAREN) {
+            this.go();
+            return Collections.emptyList();
+        }
+        List<IdentifierExpression> identifierExpressionList = new ArrayList<>();
+        while(true) {
+            if(this.nextToken.getType() == Token.Type.RPAREN) {
+                this.go();
+                break;
+            }
+            if(this.nextToken.getType() == Token.Type.COMMA) {
+                this.go();
+                continue;
+            }
+            if(this.nextToken.getType() == Token.Type.IDENT) {
+                this.go();
+                IdentifierExpression identifierExpression = (IdentifierExpression) this.parseIdentifier();
+                identifierExpressionList.add(identifierExpression);
+            }
+        }
+        return identifierExpressionList;
+    }
+
+    private Expression parseCallExpression(Expression function) throws Exception {
+        CallExpression callExpression = new CallExpression(this.currentToken, function);
+        callExpression.addArguments(this.parseCallArguments());
+        return callExpression;
+    }
+
+    private List<Expression> parseCallArguments() throws Exception {
+        if(this.nextToken.getType() == Token.Type.RPAREN) {
+            this.go();
+            return Collections.emptyList();
+        }
+        List<Expression> expressionList = new ArrayList<>();
+        while(true) {
+            if(this.nextToken.getType() == Token.Type.RPAREN) {
+                this.go();
+                break;
+            }
+            if(this.nextToken.getType() == Token.Type.COMMA) {
+                this.go();
+                continue;
+            }
+            this.go();
+            expressionList.add(this.parseExpression(Priority.LOWEST.getValue()));
+        }
+        return expressionList;
     }
 }
