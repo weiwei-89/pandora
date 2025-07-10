@@ -10,16 +10,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.edward.pandora.common.netty.ext.codec.encoder.Appender;
 
 public class Client {
-    private static Client client;
+    private Client() {
 
-    public static synchronized Client build() {
-        if(client == null) {
-            client = new Client();
-        }
-        return client;
     }
 
-    public static Client getClient() {
+    public static Client build() {
+        Client client = new Client();
+        client.init();
         return client;
     }
 
@@ -31,7 +28,7 @@ public class Client {
         this.initializer = initializer;
     }
 
-    public void startup() {
+    private void init() {
         this.group = new NioEventLoopGroup();
         ChannelInitializer<? extends SocketChannel> initializer = null;
         if(this.initializer == null) {
@@ -55,7 +52,7 @@ public class Client {
         return this.bootstrap.connect(config.getHost(), config.getPort()).sync().channel();
     }
 
-    public void shutdown() {
-        this.group.shutdownGracefully();
+    public void shutdown() throws Exception {
+        this.group.shutdownGracefully().sync();
     }
 }

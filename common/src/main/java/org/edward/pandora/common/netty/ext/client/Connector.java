@@ -21,13 +21,15 @@ public class Connector {
         logger.info("sending info......");
         if(this.session == null) {
             logger.info("there's no session, trying to connect......");
-            this.session = Session.create(this.config).login(this.user);
+            this.session = Session.create(this.config);
+            this.session.login(this.user);
             logger.info("session established");
         }
         if(!this.session.isActive()) {
             logger.info("the session is inactive, trying to reconnect......");
             this.session.close();
-            this.session = Session.create(this.config).login(this.user);
+            this.session = Session.create(this.config);
+            this.session.login(this.user);
             logger.info("session established again");
         }
         this.session.send(info.getBytes());
@@ -38,8 +40,19 @@ public class Connector {
         logger.info("closing session......");
         if(this.session == null) {
             logger.info("done(closed)");
+            return;
         }
         this.session.close();
+        logger.info("done");
+    }
+
+    public void shutdown() throws Exception {
+        logger.info("shutting down connector......");
+        if(this.session == null) {
+            logger.info("done(not started)");
+            return;
+        }
+        this.session.shutdown();
         this.session = null;
         logger.info("done");
     }
