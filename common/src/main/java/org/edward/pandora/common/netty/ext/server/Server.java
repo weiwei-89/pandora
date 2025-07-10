@@ -33,7 +33,7 @@ public class Server {
     }
 
     public void startup() throws Exception {
-        logger.info("starting up server [port:{}]......", this.config.getPort());
+        logger.info("starting up server...... [port:{}]", this.config.getPort());
         EventLoopGroup parentGroup = new NioEventLoopGroup();
         EventLoopGroup childGroup = new NioEventLoopGroup();
         try {
@@ -51,7 +51,7 @@ public class Server {
                                         TimeUnit.MILLISECONDS))
                                 .addLast(statusHandler)
                                 .addLast(new Heartbeater(100L))
-                                .addLast(new LineBasedFrameDecoder(200));
+                                .addLast(new LineBasedFrameDecoder(512));
                     }
                 };
             } else {
@@ -75,7 +75,7 @@ public class Server {
     }
 
     public void shutdown() throws Exception {
-        logger.info("shutting down server [port:{}]......", this.config.getPort());
+        logger.info("shutting down server...... [port:{}]", this.config.getPort());
         if(this.channel == null) {
             logger.info("done(stopped)");
             return;

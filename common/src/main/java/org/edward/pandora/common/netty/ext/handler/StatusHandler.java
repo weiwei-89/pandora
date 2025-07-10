@@ -14,12 +14,12 @@ public class StatusHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        logger.info("StatusHandler added");
+        logger.info("StatusHandler added [channel_id:{}]", ctx.channel().id());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("channel inactivated");
+        logger.info("channel inactivated [channel_id:{}]", ctx.channel().id());
     }
 
     @Override
@@ -27,7 +27,13 @@ public class StatusHandler extends ChannelInboundHandlerAdapter {
         if(evt instanceof IdleStateEvent) {
             IdleStateEvent event = (IdleStateEvent) evt;
             if(event.state() == IdleState.READER_IDLE) {
-                logger.info("reading bytes timeout, closing channel [channel_id:{}]......", ctx.channel().id());
+                logger.info("reading bytes timeout, closing channel...... [channel_id:{}]", ctx.channel().id());
+                ctx.close();
+            } else if(event.state() == IdleState.WRITER_IDLE) {
+                logger.info("writing bytes timeout, closing channel...... [channel_id:{}]", ctx.channel().id());
+                ctx.close();
+            } else if(event.state() == IdleState.ALL_IDLE) {
+                logger.info("reading/writing bytes timeout, closing channel...... [channel_id:{}]", ctx.channel().id());
                 ctx.close();
             }
         }

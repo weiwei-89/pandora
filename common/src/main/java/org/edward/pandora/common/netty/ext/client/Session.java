@@ -5,28 +5,14 @@ import io.netty.channel.Channel;
 import org.edward.pandora.common.model.User;
 
 public class Session {
-    private final Client client;
-    private final Config config;
+    private final Channel channel;
 
-    private Session(Client client, Config config) {
-        this.client = client;
-        this.config = config;
+    private Session(Channel channel) {
+        this.channel = channel;
     }
 
-    public static Session create(Config config) {
-        Session session = new Session(Client.build(), config);
-        try {
-            session.init();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return session;
-    }
-
-    private Channel channel;
-
-    private void init() throws Exception {
-        this.channel = this.client.connect(this.config);
+    public static Session create(Channel channel) {
+        return new Session(channel);
     }
 
     public void login(User user) {
@@ -47,15 +33,10 @@ public class Session {
         return false;
     }
 
-    public void close() throws Exception {
+    public void close() {
         if(this.channel == null) {
             return;
         }
-        this.channel.close().sync();
-        this.channel = null;
-    }
-
-    public void shutdown() throws Exception {
-        this.client.shutdown();
+        this.channel.close();
     }
 }

@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.edward.pandora.common.netty.ext.codec.encoder.Appender;
+import org.edward.pandora.common.netty.ext.handler.StatusHandler;
 
 public class Client {
     private Client() {
@@ -32,10 +33,12 @@ public class Client {
         this.group = new NioEventLoopGroup();
         ChannelInitializer<? extends SocketChannel> initializer = null;
         if(this.initializer == null) {
+            StatusHandler statusHandler = new StatusHandler();
             initializer = new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline()
+                            .addLast(statusHandler)
                             .addLast(new Appender("\r\n".getBytes()));
                 }
             };
@@ -52,7 +55,7 @@ public class Client {
         return this.bootstrap.connect(config.getHost(), config.getPort()).sync().channel();
     }
 
-    public void shutdown() throws Exception {
-        this.group.shutdownGracefully().sync();
+    public void shutdown() {
+        this.group.shutdownGracefully();
     }
 }

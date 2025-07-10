@@ -1,6 +1,7 @@
 package org.edward.pandora.test;
 
 import org.edward.pandora.common.model.User;
+import org.edward.pandora.common.netty.ext.client.Client;
 import org.edward.pandora.common.netty.ext.client.Config;
 import org.edward.pandora.common.netty.ext.client.Connector;
 import org.slf4j.Logger;
@@ -16,14 +17,15 @@ public class TcpClientTest {
         User user = new User();
         user.setName("edward");
         user.setPassword("123456");
+        Client client = Client.build();
         Connector connector = null;
         try {
-            connector = new Connector(config, user);
-            connector.send("hello");
-            connector.close();
+            connector = new Connector(client, user);
+            connector.send(config, "hello");
+//            connector.close(config);
         } finally {
             if(connector != null) {
-                connector.shutdown();
+//                connector.shutdown();
             }
         }
     }
