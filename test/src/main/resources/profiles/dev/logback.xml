@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property name="COMMON_PATTERN" value="%d{HH:mm:ss.SSS} %level ${PID} [%thread] [%logger{0}] %msg%n"/>
-    <property name="SYSTEM_PATH" value="${LOG_PATH}/log/system"/>
-    <property name="SYSTEM_WARN_PATH" value="${LOG_PATH}/log/system_warn"/>
+    <property name="SYSTEM_PATH" value="${LOG_PATH}/system"/>
+    <property name="SYSTEM_WARN_PATH" value="${LOG_PATH}/system_warn"/>
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${COMMON_PATTERN}</pattern>

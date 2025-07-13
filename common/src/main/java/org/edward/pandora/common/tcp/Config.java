@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.client;
+package org.edward.pandora.common.tcp;
 
 public class Config {
     private String host;
