@@ -7,6 +7,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.commons.cli.*;
 import org.edward.pandora.common.netty.ext.codec.decoder.FrameDecoder;
 import org.edward.pandora.common.netty.ext.handler.Heartbeater;
 import org.edward.pandora.common.netty.ext.handler.IdleHandler;
@@ -22,17 +23,28 @@ import java.util.concurrent.TimeUnit;
 
 public class TcpServerTest {
     private static final Logger logger = LoggerFactory.getLogger(TcpServerTest.class);
+    private static final String LISTEN_PORT = "listen.port";
 
     public static void main(String[] args) throws Exception {
+        Options options = new Options();
+        options.addOption(Option.builder().longOpt(LISTEN_PORT).required(true).hasArg(true).build());
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
+        int listenPort = Integer.parseInt(cmd.getOptionValue(LISTEN_PORT));
         Config config = new Config();
-        config.setPort(8090);
+        config.setPort(listenPort);
         StatusHandler statusHandler = new StatusHandler();
         Server server = new Server(config);
         server.setInitializer(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline()
-                        .addLast(new IdleHandler(10000L, 0, 0, TimeUnit.MILLISECONDS))
+                        .addLast(new IdleHandler(
+                                10000L,
+                                0,
+                                0,
+                                TimeUnit.MILLISECONDS)
+                        )
                         .addLast(statusHandler)
                         .addLast(new Heartbeater(100L))
 //                        .addLast(new FrameDecoder(new byte[]{0x3D}, 8))

@@ -2,7 +2,6 @@ package org.edward.pandora.common.netty.ext.client;
 
 import org.edward.pandora.common.model.User;
 import org.edward.pandora.common.tcp.Config;
-import org.edward.pandora.common.tcp.TcpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

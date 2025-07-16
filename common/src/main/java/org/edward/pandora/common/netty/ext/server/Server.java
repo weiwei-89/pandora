@@ -48,7 +48,8 @@ public class Server {
                                         config.getReadTimeout(),
                                         config.getWriteTimeout(),
                                         config.getReadWriteTimeout(),
-                                        TimeUnit.MILLISECONDS))
+                                        TimeUnit.MILLISECONDS)
+                                )
                                 .addLast(statusHandler)
                                 .addLast(new Heartbeater(100L))
                                 .addLast(new LineBasedFrameDecoder(512));

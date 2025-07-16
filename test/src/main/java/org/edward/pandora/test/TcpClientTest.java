@@ -35,7 +35,8 @@ public class TcpClientTest {
             session.send("hello");
             Thread.sleep(15000L);
 //            session.close();
-            session.stop();
+//            session.stop();
+            connector.shutdown();
             Thread.sleep(30000L);
         } finally {
             if(session != null) {
