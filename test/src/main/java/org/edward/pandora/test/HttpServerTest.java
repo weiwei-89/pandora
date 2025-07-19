@@ -4,7 +4,10 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
 import org.apache.commons.cli.*;
+import org.edward.pandora.common.http.ApiLoader;
+import org.edward.pandora.common.netty.ext.handler.HttpDispatchHandler;
 import org.edward.pandora.common.netty.ext.handler.HttpJsonHandler;
+import org.edward.pandora.common.netty.ext.handler.HttpResponseHandler;
 import org.edward.pandora.common.netty.ext.handler.StatusHandler;
 import org.edward.pandora.common.netty.ext.server.Config;
 import org.edward.pandora.common.netty.ext.server.Server;
@@ -24,6 +27,8 @@ public class HttpServerTest {
         Config config = new Config();
         config.setPort(listenPort);
         StatusHandler statusHandler = new StatusHandler();
+        ApiLoader apiLoader = new ApiLoader();
+        apiLoader.scan("org.edward.pandora.test.controller");
         Server server = new Server(config);
         server.setInitializer(new ChannelInitializer<SocketChannel>() {
             @Override
@@ -32,7 +37,9 @@ public class HttpServerTest {
                         .addLast(statusHandler)
                         .addLast(new HttpServerCodec())
                         .addLast(new HttpObjectAggregator(1024*1024))
-                        .addLast(new HttpJsonHandler());
+                        .addLast(new HttpJsonHandler())
+                        .addLast(new HttpDispatchHandler(apiLoader))
+                        .addLast(new HttpResponseHandler());
             }
         });
         server.startup();

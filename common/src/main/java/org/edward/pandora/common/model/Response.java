@@ -2,9 +2,9 @@ package org.edward.pandora.common.model;
 
 public class Response {
     private final int code;
-    private final String msg;
+    private final Object msg;
 
-    public Response(int code, String msg) {
+    public Response(int code, Object msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -12,7 +12,7 @@ public class Response {
     public int getCode() {
         return code;
     }
-    public String getMsg() {
+    public Object getMsg() {
         return msg;
     }
 
