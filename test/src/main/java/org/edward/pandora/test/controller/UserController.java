@@ -1,5 +1,6 @@
 package org.edward.pandora.test.controller;
 
+import com.alibaba.fastjson2.JSON;
 import org.edward.pandora.common.http.JsonParam;
 import org.edward.pandora.common.http.Path;
 import org.slf4j.Logger;
@@ -18,5 +19,10 @@ public class UserController {
     @Path("shoot")
     public void shoot(String token, @JsonParam String json) {
         logger.info("json: {}", json);
+    }
+
+    @Path("add")
+    public void add(String token, @JsonParam UserInfo param) {
+        logger.info("param: {}", JSON.toJSONString(param));
     }
 }

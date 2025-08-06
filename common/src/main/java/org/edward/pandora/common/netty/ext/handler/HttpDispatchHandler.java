@@ -34,7 +34,9 @@ public class HttpDispatchHandler extends MessageToMessageDecoder<FullHttpRequest
         logger.info("json: {}", json);
         Object result = this.apiLoader.execute(uri, json);
         logger.info("result: {}", JSON.toJSONString(result));
-        if(result != null) {
+        if(result == null) {
+            out.add("");
+        } else {
             out.add(result);
         }
     }

@@ -1,5 +1,8 @@
 package org.edward.pandora.common.http;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
@@ -14,6 +17,12 @@ public class ApiLoader {
     private final Map<String, Object> instanceMap = new HashMap<>();
     private final Map<String, Method> methodMap = new HashMap<>();
     private final Map<String, String> methodInstanceMap = new HashMap<>();
+    private final ObjectMapper objectMapper;
+
+    public ApiLoader() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     private static String generateMethodPath(Path classAnnotation, Path methodAnnotation) {
         return String.format("/%s/%s", classAnnotation.value(), methodAnnotation.value());
@@ -84,7 +93,16 @@ public class ApiLoader {
         for(int i=0; i<parameters.length; i++) {
             Parameter parameter = parameters[i];
             if(parameter.isAnnotationPresent(JsonParam.class)) {
-                args[i] = json;
+                if(StringUtils.isBlank(json)) {
+                    args[i] = null;
+                    continue;
+                }
+                Class<?> parameterType = parameter.getType();
+                if(parameterType == String.class) {
+                    args[i] = json;
+                } else {
+                    args[i] = this.objectMapper.readValue(json, parameterType);
+                }
             } else {
                 args[i] = null;
             }
