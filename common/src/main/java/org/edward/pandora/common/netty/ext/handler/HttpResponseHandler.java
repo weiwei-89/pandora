@@ -1,6 +1,7 @@
 package org.edward.pandora.common.netty.ext.handler;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
@@ -11,6 +12,13 @@ import org.slf4j.LoggerFactory;
 
 public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(HttpResponseHandler.class);
+    private final ObjectMapper objectMapper;
+
+    public HttpResponseHandler() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        this.objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -24,7 +32,7 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.copiedBuffer(JSON.toJSONString(response), CharsetUtil.UTF_8)
+                Unpooled.copiedBuffer(this.objectMapper.writeValueAsString(response), CharsetUtil.UTF_8)
         );
         httpResponse.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
@@ -41,7 +49,7 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
-                Unpooled.copiedBuffer(JSON.toJSONString(response), CharsetUtil.UTF_8)
+                Unpooled.copiedBuffer(this.objectMapper.writeValueAsString(response), CharsetUtil.UTF_8)
         );
         httpResponse.headers()
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
