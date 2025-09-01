@@ -37,10 +37,12 @@ public class FrameDecoder extends ByteToMessageDecoder {
             return;
         }
         if(this.findDelimiter) {
-            if(in.readableBytes() >= this.length) {
-                out.add(in.readRetainedSlice(this.length));
-                this.findDelimiter = false;
+            ByteBuf target = this.findTarget(in);
+            if(target == null) {
+                return;
             }
+            out.add(target);
+            this.findDelimiter = false;
         } else {
             this.delimiterIndex = ByteBufUtil.index(in, this.delimiter);
             if(this.delimiterIndex >= 0) {
@@ -50,16 +52,25 @@ public class FrameDecoder extends ByteToMessageDecoder {
                     in.discardReadBytes();
                     this.delimiterIndex = 0;
                 }
-                if(in.readableBytes() >= this.length) {
-                    out.add(in.readRetainedSlice(this.length));
-                    this.findDelimiter = false;
+                ByteBuf target = this.findTarget(in);
+                if(target == null) {
+                    return;
                 }
+                out.add(target);
+                this.findDelimiter = false;
             } else {
                 this.findDelimiter = false;
                 in.skipBytes(in.readableBytes()-this.delimiter.length);
                 in.discardReadBytes();
             }
         }
+    }
+
+    private ByteBuf findTarget(ByteBuf in) {
+        if(in.readableBytes() < this.length) {
+            return null;
+        }
+        return in.readRetainedSlice(this.length);
     }
 
     @Override

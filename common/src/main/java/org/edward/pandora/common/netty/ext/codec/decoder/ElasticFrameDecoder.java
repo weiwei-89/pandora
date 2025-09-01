@@ -33,26 +33,16 @@ public class ElasticFrameDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        if(in.readableBytes() < this.delimiter.length) {
+            return;
+        }
         if(this.findDelimiter) {
-            if(in.readableBytes() >= this.delimiter.length*2) {
-                ByteBuf cache = in.slice(this.delimiter.length, in.readableBytes()-this.delimiter.length);
-                int nextDelimiterIndex = ByteBufUtil.index(cache, this.delimiter);
-                if(nextDelimiterIndex >= 0) {
-                    int middleLength = this.delimiter.length + nextDelimiterIndex;
-                    if(middleLength >= this.maxLength) {
-                        out.add(in.readRetainedSlice(this.maxLength));
-                        this.findDelimiter = false;
-                    } else {
-                        out.add(in.readRetainedSlice(middleLength));
-                        this.findDelimiter = false;
-                    }
-                } else {
-                    if(in.readableBytes() >= this.maxLength) {
-                        out.add(in.readRetainedSlice(this.maxLength));
-                        this.findDelimiter = false;
-                    }
-                }
+            ByteBuf target = this.findTarget(in);
+            if(target == null) {
+                return;
             }
+            out.add(target);
+            this.findDelimiter = false;
         } else {
             this.delimiterIndex = ByteBufUtil.index(in, this.delimiter);
             if(this.delimiterIndex >= 0) {
@@ -62,31 +52,39 @@ public class ElasticFrameDecoder extends ByteToMessageDecoder {
                     in.discardReadBytes();
                     this.delimiterIndex = 0;
                 }
-                if(in.readableBytes() >= this.delimiter.length*2) {
-                    ByteBuf cache = in.slice(this.delimiter.length, in.readableBytes()-this.delimiter.length);
-                    int nextDelimiterIndex = ByteBufUtil.index(cache, this.delimiter);
-                    if(nextDelimiterIndex >= 0) {
-                        int middleLength = this.delimiter.length + nextDelimiterIndex;
-                        if(middleLength >= this.maxLength) {
-                            out.add(in.readRetainedSlice(this.maxLength));
-                            this.findDelimiter = false;
-                        } else {
-                            out.add(in.readRetainedSlice(middleLength));
-                            this.findDelimiter = false;
-                        }
-                    } else {
-                        if(in.readableBytes() >= this.maxLength) {
-                            out.add(in.readRetainedSlice(this.maxLength));
-                            this.findDelimiter = false;
-                        }
-                    }
+                ByteBuf target = this.findTarget(in);
+                if(target == null) {
+                    return;
                 }
+                out.add(target);
+                this.findDelimiter = false;
             } else {
                 this.findDelimiter = false;
                 in.skipBytes(in.readableBytes()-this.delimiter.length);
                 in.discardReadBytes();
             }
         }
+    }
+
+    private ByteBuf findTarget(ByteBuf in) {
+        if(in.readableBytes() < this.delimiter.length*2) {
+            return null;
+        }
+        ByteBuf cache = in.slice(this.delimiter.length, in.readableBytes()-this.delimiter.length);
+        int nextDelimiterIndex = ByteBufUtil.index(cache, this.delimiter);
+        if(nextDelimiterIndex >= 0) {
+            int middleLength = this.delimiter.length + nextDelimiterIndex;
+            if(middleLength >= this.maxLength) {
+                return in.readRetainedSlice(this.maxLength);
+            } else {
+                return in.readRetainedSlice(middleLength);
+            }
+        } else {
+            if(in.readableBytes() >= this.maxLength) {
+                return in.readRetainedSlice(this.maxLength);
+            }
+        }
+        return null;
     }
 
     @Override
