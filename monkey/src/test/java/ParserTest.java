@@ -106,6 +106,7 @@ public class ParserTest {
     @Test
     public void testFunctionLiteralParsing() throws Exception {
         StringBuilder sb = new StringBuilder();
+        sb.append("fn() { 6; a+b; }").append("\n");
         sb.append("fn(x) { x; a+b; }").append("\n");
         sb.append("fn(,,x,) { x; a+b; }").append("\n");
         sb.append("fn(x, y) { 5+(2-6); 7*(9+3); }").append("\n");

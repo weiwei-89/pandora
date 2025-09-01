@@ -14,6 +14,10 @@ public class Program implements Node {
         this.statementList.add(statement);
     }
 
+    public List<Statement> getStatementList() {
+        return this.statementList;
+    }
+
     @Override
     public String tokenLiteral() {
         if(this.statementList.size() == 0) {

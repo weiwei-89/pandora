@@ -10,17 +10,16 @@ public class Lexer {
         this.input = input;
     }
 
-    private int currentPosition = 0;
-    private int nextPosition = 0;
+    private int currentPosition = -1;
     private char currentCharacter;
 
     private void read() throws Exception {
-        if(this.nextPosition >= this.input.length()) {
+        int nextPosition = this.currentPosition + 1;
+        if(nextPosition >= this.input.length()) {
             throw new EndOfLineException();
         }
-        this.currentCharacter = this.input.charAt(this.nextPosition);
-        this.currentPosition = this.nextPosition;
-        this.nextPosition++;
+        this.currentPosition = nextPosition;
+        this.currentCharacter = this.input.charAt(nextPosition);
     }
 
     private void skipBlank() throws Exception {
@@ -38,10 +37,11 @@ public class Lexer {
     }
 
     private char inspectNext() {
-        if(this.nextPosition >= this.input.length()) {
+        int nextPosition = this.currentPosition + 1;
+        if(nextPosition >= this.input.length()) {
             return ' ';
         }
-        return this.input.charAt(this.nextPosition);
+        return this.input.charAt(nextPosition);
     }
 
     private boolean isLetter(char c) {

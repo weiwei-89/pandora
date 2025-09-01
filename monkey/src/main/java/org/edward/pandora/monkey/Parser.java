@@ -120,6 +120,9 @@ public class Parser {
             if(this.currentToken.getType() == Token.Type.EOF) {
                 break;
             }
+            if(this.currentToken.getType() == Token.Type.ILLEGAL) {
+                continue;
+            }
             Statement statement = this.parseStatement();
             if(statement == null) {
                 continue;
@@ -287,10 +290,6 @@ public class Parser {
     private List<IdentifierExpression> parseFunctionParameters() throws Exception {
         this.expect(Token.Type.LPAREN);
         this.go();
-        if(this.nextToken.getType() == Token.Type.RPAREN) {
-            this.go();
-            return Collections.emptyList();
-        }
         List<IdentifierExpression> identifierExpressionList = new ArrayList<>();
         while(true) {
             if(this.nextToken.getType() == Token.Type.RPAREN) {
@@ -317,10 +316,6 @@ public class Parser {
     }
 
     private List<Expression> parseCallArguments() throws Exception {
-        if(this.nextToken.getType() == Token.Type.RPAREN) {
-            this.go();
-            return Collections.emptyList();
-        }
         List<Expression> expressionList = new ArrayList<>();
         while(true) {
             if(this.nextToken.getType() == Token.Type.RPAREN) {
