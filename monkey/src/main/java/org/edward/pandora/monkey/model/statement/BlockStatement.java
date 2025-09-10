@@ -23,6 +23,10 @@ public class BlockStatement implements Statement {
         this.statementList.add(statement);
     }
 
+    public List<Statement> getStatementList() {
+        return this.statementList;
+    }
+
     @Override
     public void statementNode() {
 

@@ -1,13 +1,11 @@
 package org.edward.pandora.monkey.model;
 
-import org.edward.pandora.monkey.model.evaluator.BooleanElement;
-import org.edward.pandora.monkey.model.evaluator.EvalFunction;
-import org.edward.pandora.monkey.model.evaluator.IntegerElement;
-import org.edward.pandora.monkey.model.expression.BooleanExpression;
-import org.edward.pandora.monkey.model.expression.InfixExpression;
-import org.edward.pandora.monkey.model.expression.IntegerExpression;
-import org.edward.pandora.monkey.model.expression.PrefixExpression;
+import org.edward.pandora.monkey.exception.EvaluateException;
+import org.edward.pandora.monkey.model.evaluator.*;
+import org.edward.pandora.monkey.model.expression.*;
+import org.edward.pandora.monkey.model.statement.BlockStatement;
 import org.edward.pandora.monkey.model.statement.ExpressionStatement;
+import org.edward.pandora.monkey.model.statement.ReturnStatement;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +25,9 @@ public class Evaluator {
         this.register(ExpressionStatement.class, this::handleExpressionStatement);
         this.register(PrefixExpression.class, this::handlePrefixExpression);
         this.register(InfixExpression.class, this::handleInfixExpression);
+        this.register(IfExpression.class, this::handleIfExpression);
+        this.register(BlockStatement.class, this::handleBlockStatement);
+        this.register(ReturnStatement.class, this::handleReturnStatement);
     }
 
     private <T extends Node> void register(Class<T> nodeType, EvalFunction<T, Element> handler) {
@@ -41,7 +42,7 @@ public class Evaluator {
     public Element eval(Node node) throws Exception {
         EvalFunction<Node, Element> handler = this.handlers.get(node.getClass());
         if(handler == null) {
-            throw new Exception(String.format("unsupported expression:\n%s", node.string()));
+            throw new EvaluateException(String.format("unsupported expression:\n%s", node.string()));
         }
         return handler.apply(node);
     }
@@ -57,11 +58,14 @@ public class Evaluator {
     private Element handleProgram(Program program) throws Exception {
         List<Statement> statementList = program.getStatementList();
         if(statementList==null || statementList.size()==0) {
-            return null;
+            return NullElement.INSTANCE;
         }
         Element result = null;
         for(Statement statement : statementList) {
             result = this.eval(statement);
+            if(result!=null && result.type()==Element.Type.RETURN) {
+                return result;
+            }
         }
         return result;
     }
@@ -83,25 +87,25 @@ public class Evaluator {
             } else if(rightResult.type() == Element.Type.INTEGER) {
                 IntegerElement rightIntegerElement = (IntegerElement) rightResult;
                 if(rightIntegerElement.getValue() > 0) {
-                    return BooleanElement.FALSE;
+                    return BooleanElement.TRUE;
                 }
-                return BooleanElement.TRUE;
+                return BooleanElement.FALSE;
             }
-            throw new Exception("invalid element after \"!\"");
+            throw new EvaluateException("invalid element after \"!\"");
         } else if("-".equals(operator)) {
             if(rightResult.type() != Element.Type.INTEGER) {
-                throw new Exception("invalid element after \"-\"");
+                throw new EvaluateException("invalid element after \"-\"");
             }
             IntegerElement rightIntegerElement = (IntegerElement) rightResult;
             return new IntegerElement(rightIntegerElement.getValue()*(-1));
         } else if("+".equals(operator)) {
             if(rightResult.type() != Element.Type.INTEGER) {
-                throw new Exception("invalid element after \"+\"");
+                throw new EvaluateException("invalid element after \"+\"");
             }
             IntegerElement rightIntegerElement = (IntegerElement) rightResult;
             return new IntegerElement(rightIntegerElement.getValue());
         }
-        throw new Exception(String.format("unsupported prefix \"%s\"", operator));
+        throw new EvaluateException(String.format("unsupported prefix \"%s\"", operator));
     }
 
     private Element handleInfixExpression(InfixExpression expression) throws Exception {
@@ -128,16 +132,57 @@ public class Evaluator {
             } else if("!=".equals(operator)) {
                 return BooleanElement.of(leftIntegerElement.getValue()!=rightIntegerElement.getValue());
             }
-            throw new Exception(String.format("unsupported operator \"%s\"", operator));
+            throw new EvaluateException(String.format("unsupported operator \"%s\"", operator));
         } else if(leftResult.type()==Element.Type.BOOLEAN && rightResult.type()==Element.Type.BOOLEAN) {
             if("==".equals(operator)) {
                 return BooleanElement.of(leftResult==rightResult);
             } else if("!=".equals(operator)) {
                 return BooleanElement.of(leftResult!=rightResult);
             }
-            throw new Exception(String.format("unsupported operator \"%s\"", operator));
+            throw new EvaluateException(String.format("unsupported operator \"%s\"", operator));
         }
-        throw new Exception(String.format("invalid expression:\n%s", expression.string()));
+        throw new EvaluateException(String.format("invalid expression:\n%s", expression.string()));
+    }
+
+    private Element handleIfExpression(IfExpression expression) throws Exception {
+        Element conditionResult = this.eval(expression.getCondition());
+        boolean _conditionResult = false;
+        if(conditionResult.type() == Element.Type.BOOLEAN) {
+            _conditionResult = ((BooleanElement) conditionResult).getValue();
+        } else if(conditionResult.type() == Element.Type.INTEGER) {
+            IntegerElement conditionIntegerResult = (IntegerElement) conditionResult;
+            _conditionResult = conditionIntegerResult.getValue()>0?true:false;
+        } else {
+            throw new EvaluateException(String.format("invalid condition:\n%s", expression.getCondition().string()));
+        }
+        if(_conditionResult) {
+            return this.eval(expression.getConsequence());
+        } else {
+            if(expression.getAlternative() == null) {
+                return NullElement.INSTANCE;
+            }
+            return this.eval(expression.getAlternative());
+        }
+    }
+
+    private Element handleBlockStatement(BlockStatement statement) throws Exception {
+        List<Statement> statementList = statement.getStatementList();
+        if(statementList==null || statementList.size()==0) {
+            return NullElement.INSTANCE;
+        }
+        Element result = null;
+        for(Statement _statement : statementList) {
+            result = this.eval(_statement);
+            if(result!=null && result.type()==Element.Type.RETURN) {
+                return result;
+            }
+        }
+        return result;
+    }
+
+    private Element handleReturnStatement(ReturnStatement statement) throws Exception {
+        Element returnResult = this.eval(statement.getValue());
+        return new ReturnElement(returnResult);
     }
 
 //    private Element evalProgram(Program program) {

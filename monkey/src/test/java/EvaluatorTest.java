@@ -67,4 +67,36 @@ public class EvaluatorTest {
         Element result = evaluator.eval(program);
         System.out.println(result.inspect());
     }
+
+    @Test
+    public void testIfElseStatement() throws Exception {
+        StringBuilder sb = new StringBuilder();
+//        sb.append("if(true) {10}").append("\n");
+//        sb.append("if(1) {10}").append("\n");
+//        sb.append("if(1>2) {10}").append("\n");
+//        sb.append("if(1<2) {10}").append("\n");
+        sb.append("if(1>2) {10} else {20}").append("\n");
+        Lexer lexer = new Lexer(sb.toString());
+        Parser parser = new Parser(lexer);
+        Program program = parser.parseProgram();
+        Evaluator evaluator = new Evaluator();
+        Element result = evaluator.eval(program);
+        System.out.println(result.inspect());
+    }
+
+    @Test
+    public void testReturnStatement() throws Exception {
+        StringBuilder sb = new StringBuilder();
+//        sb.append("return 15;").append("\n");
+//        sb.append("6; return 15; return 99;").append("\n");
+//        sb.append("if(10 > 1) {if(9>5) {return 7;} return 5;}").append("\n");
+//        sb.append("6; return 2*9; 15;").append("\n");
+        sb.append("return 6; return 2*9; 15;").append("\n");
+        Lexer lexer = new Lexer(sb.toString());
+        Parser parser = new Parser(lexer);
+        Program program = parser.parseProgram();
+        Evaluator evaluator = new Evaluator();
+        Element result = evaluator.eval(program);
+        System.out.println(result.inspect());
+    }
 }
