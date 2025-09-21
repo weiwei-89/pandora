@@ -1,40 +1,9 @@
 package org.edward.pandora.monkey.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.edward.pandora.monkey.model.statement.BlockStatement;
 
-public class Program implements Node {
-    private final List<Statement> statementList;
-
+public class Program extends BlockStatement {
     public Program() {
-        this.statementList = new ArrayList<>();
-    }
-
-    public void addStatement(Statement statement) {
-        this.statementList.add(statement);
-    }
-
-    public List<Statement> getStatementList() {
-        return this.statementList;
-    }
-
-    @Override
-    public String tokenLiteral() {
-        if(this.statementList.size() == 0) {
-            return "";
-        }
-        return this.statementList.get(0).tokenLiteral();
-    }
-
-    @Override
-    public String string() {
-        if(this.statementList.size() == 0) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        for(Statement statement : this.statementList) {
-            sb.append(statement.string()).append("\n");
-        }
-        return sb.toString();
+        super(null);
     }
 }

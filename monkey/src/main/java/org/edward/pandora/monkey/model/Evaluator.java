@@ -5,14 +5,18 @@ import org.edward.pandora.monkey.model.evaluator.*;
 import org.edward.pandora.monkey.model.expression.*;
 import org.edward.pandora.monkey.model.statement.BlockStatement;
 import org.edward.pandora.monkey.model.statement.ExpressionStatement;
+import org.edward.pandora.monkey.model.statement.LetStatement;
 import org.edward.pandora.monkey.model.statement.ReturnStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Evaluator {
-    private final Map<Class<? extends Node>, EvalFunction<Node, Element>> handlers = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(Evaluator.class);
+    private final Map<Class<? extends Node>, EvalFunction<Node, Environment, Element>> handlers = new HashMap<>();
 
     public Evaluator() {
         this.registerHandlers();
@@ -28,55 +32,47 @@ public class Evaluator {
         this.register(IfExpression.class, this::handleIfExpression);
         this.register(BlockStatement.class, this::handleBlockStatement);
         this.register(ReturnStatement.class, this::handleReturnStatement);
+        this.register(IdentifierExpression.class, this::handleIdentifierExpression);
+        this.register(LetStatement.class, this::handleLetStatement);
     }
 
-    private <T extends Node> void register(Class<T> nodeType, EvalFunction<T, Element> handler) {
+    private <N extends Node> void register(Class<N> nodeType, EvalFunction<N, Environment, Element> handler) {
         this.handlers.put(
                 nodeType,
-                node -> {
-                    return handler.apply(nodeType.cast(node));
+                (node, env) -> {
+                    logger.info("invoke function for {}", nodeType.getName());
+                    return handler.apply(nodeType.cast(node), env);
                 }
         );
     }
 
-    public Element eval(Node node) throws Exception {
-        EvalFunction<Node, Element> handler = this.handlers.get(node.getClass());
+    public Element eval(Node node, Environment env) throws Exception {
+        EvalFunction<Node, Environment, Element> handler = this.handlers.get(node.getClass());
         if(handler == null) {
             throw new EvaluateException(String.format("unsupported expression:\n%s", node.string()));
         }
-        return handler.apply(node);
+        return handler.apply(node, env);
     }
 
-    private Element handleIntegerExpression(IntegerExpression expression) throws Exception {
+    private Element handleIntegerExpression(IntegerExpression expression, Environment env) throws Exception {
         return new IntegerElement(expression.getValue());
     }
 
-    private Element handleBooleanExpression(BooleanExpression expression) throws Exception {
+    private Element handleBooleanExpression(BooleanExpression expression, Environment env) throws Exception {
         return BooleanElement.of(expression.isValue());
     }
 
-    private Element handleProgram(Program program) throws Exception {
-        List<Statement> statementList = program.getStatementList();
-        if(statementList==null || statementList.size()==0) {
-            return NullElement.INSTANCE;
-        }
-        Element result = null;
-        for(Statement statement : statementList) {
-            result = this.eval(statement);
-            if(result!=null && result.type()==Element.Type.RETURN) {
-                return result;
-            }
-        }
-        return result;
+    private Element handleProgram(Program program, Environment env) throws Exception {
+        return this.handleBlockStatement(program, env);
     }
 
-    private Element handleExpressionStatement(ExpressionStatement statement) throws Exception {
-        return this.eval(statement.getExpression());
+    private Element handleExpressionStatement(ExpressionStatement statement, Environment env) throws Exception {
+        return this.eval(statement.getExpression(), env);
     }
 
-    private Element handlePrefixExpression(PrefixExpression expression) throws Exception {
+    private Element handlePrefixExpression(PrefixExpression expression, Environment env) throws Exception {
         String operator = expression.getOperator();
-        Element rightResult = this.eval(expression.getRight());
+        Element rightResult = this.eval(expression.getRight(), env);
         if("!".equals(operator)) {
             if(rightResult.type() == Element.Type.BOOLEAN) {
                 if(rightResult == BooleanElement.TRUE) {
@@ -108,10 +104,10 @@ public class Evaluator {
         throw new EvaluateException(String.format("unsupported prefix \"%s\"", operator));
     }
 
-    private Element handleInfixExpression(InfixExpression expression) throws Exception {
-        Element leftResult = this.eval(expression.getLeft());
+    private Element handleInfixExpression(InfixExpression expression, Environment env) throws Exception {
+        Element leftResult = this.eval(expression.getLeft(), env);
         String operator = expression.getOperator();
-        Element rightResult = this.eval(expression.getRight());
+        Element rightResult = this.eval(expression.getRight(), env);
         if(leftResult.type()==Element.Type.INTEGER && rightResult.type()==Element.Type.INTEGER) {
             IntegerElement leftIntegerElement = (IntegerElement) leftResult;
             IntegerElement rightIntegerElement = (IntegerElement) rightResult;
@@ -144,8 +140,8 @@ public class Evaluator {
         throw new EvaluateException(String.format("invalid expression:\n%s", expression.string()));
     }
 
-    private Element handleIfExpression(IfExpression expression) throws Exception {
-        Element conditionResult = this.eval(expression.getCondition());
+    private Element handleIfExpression(IfExpression expression, Environment env) throws Exception {
+        Element conditionResult = this.eval(expression.getCondition(), env);
         boolean _conditionResult = false;
         if(conditionResult.type() == Element.Type.BOOLEAN) {
             _conditionResult = ((BooleanElement) conditionResult).getValue();
@@ -156,23 +152,26 @@ public class Evaluator {
             throw new EvaluateException(String.format("invalid condition:\n%s", expression.getCondition().string()));
         }
         if(_conditionResult) {
-            return this.eval(expression.getConsequence());
+            return this.eval(expression.getConsequence(), env);
         } else {
             if(expression.getAlternative() == null) {
                 return NullElement.INSTANCE;
             }
-            return this.eval(expression.getAlternative());
+            return this.eval(expression.getAlternative(), env);
         }
     }
 
-    private Element handleBlockStatement(BlockStatement statement) throws Exception {
+    private Element handleBlockStatement(BlockStatement statement, Environment env) throws Exception {
         List<Statement> statementList = statement.getStatementList();
         if(statementList==null || statementList.size()==0) {
             return NullElement.INSTANCE;
         }
         Element result = null;
         for(Statement _statement : statementList) {
-            result = this.eval(_statement);
+            result = this.eval(_statement, env);
+            if(result!=null && result.type()==Element.Type.VOID) {
+                continue;
+            }
             if(result!=null && result.type()==Element.Type.RETURN) {
                 return result;
             }
@@ -180,15 +179,22 @@ public class Evaluator {
         return result;
     }
 
-    private Element handleReturnStatement(ReturnStatement statement) throws Exception {
-        Element returnResult = this.eval(statement.getValue());
+    private Element handleReturnStatement(ReturnStatement statement, Environment env) throws Exception {
+        Element returnResult = this.eval(statement.getValue(), env);
         return new ReturnElement(returnResult);
     }
 
-//    private Element evalProgram(Program program) {
-//        List<Statement> statementList = program.getStatementList();
-//        if(statementList==null || statementList.size()==0) {
-//            return null;
-//        }
-//    }
+    private Element handleLetStatement(LetStatement statement, Environment env) throws Exception {
+        Element valueResult = this.eval(statement.getValue(), env);
+        env.set(statement.getName().getValue(), valueResult);
+        return new VoidElement();
+    }
+
+    private Element handleIdentifierExpression(IdentifierExpression expression, Environment env) throws Exception {
+        Element value = env.get(expression.getValue());
+        if(value == null) {
+            throw new EvaluateException(String.format("identifier \"%s\" not initialized", expression.getValue()));
+        }
+        return value;
+    }
 }

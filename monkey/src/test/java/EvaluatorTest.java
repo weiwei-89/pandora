@@ -1,6 +1,7 @@
 import org.edward.pandora.monkey.Lexer;
 import org.edward.pandora.monkey.Parser;
 import org.edward.pandora.monkey.model.Element;
+import org.edward.pandora.monkey.model.Environment;
 import org.edward.pandora.monkey.model.Evaluator;
 import org.edward.pandora.monkey.model.Program;
 import org.junit.Test;
@@ -26,7 +27,8 @@ public class EvaluatorTest {
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();
         Evaluator evaluator = new Evaluator();
-        Element result = evaluator.eval(program);
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
         System.out.println(result.inspect());
     }
 
@@ -44,7 +46,8 @@ public class EvaluatorTest {
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();
         Evaluator evaluator = new Evaluator();
-        Element result = evaluator.eval(program);
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
         System.out.println(result.inspect());
     }
 
@@ -64,7 +67,8 @@ public class EvaluatorTest {
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();
         Evaluator evaluator = new Evaluator();
-        Element result = evaluator.eval(program);
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
         System.out.println(result.inspect());
     }
 
@@ -80,7 +84,8 @@ public class EvaluatorTest {
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();
         Evaluator evaluator = new Evaluator();
-        Element result = evaluator.eval(program);
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
         System.out.println(result.inspect());
     }
 
@@ -96,7 +101,23 @@ public class EvaluatorTest {
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();
         Evaluator evaluator = new Evaluator();
-        Element result = evaluator.eval(program);
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
+        System.out.println(result.inspect());
+    }
+
+    @Test
+    public void testLetStatement() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        sb.append("let a = 5;").append("\n");
+        sb.append("a;").append("\n");
+        sb.append("a + 2;").append("\n");
+        Lexer lexer = new Lexer(sb.toString());
+        Parser parser = new Parser(lexer);
+        Program program = parser.parseProgram();
+        Evaluator evaluator = new Evaluator();
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
         System.out.println(result.inspect());
     }
 }
