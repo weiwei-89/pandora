@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 
 public class ProtocolDecodeTest {
     private static final Logger logger = LoggerFactory.getLogger(ProtocolDecodeTest.class);
-    private static final String[] COMMENT_MARKERS = {"//", "#", "--", "**"};
     private static final int MAX_LENGTH = 10;
 
     private static final String PROTOCOL_ID = "protocol.id";
@@ -43,36 +42,9 @@ public class ProtocolDecodeTest {
                 .setFormat(ProtocolLoader.DEFAULT_FORMAT)
                 .load(path);
         papers.setMaxLength(MAX_LENGTH);
-        BufferedReader reader = null;
-        String hex = null;
-        try {
-            reader = new BufferedReader(
-                    new InputStreamReader(
-                            new FileInputStream(dataPath),
-                            StandardCharsets.UTF_8
-                    )
-            );
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-            while((line=reader.readLine()) != null) {
-                int commentIndex = -1;
-                for(String marker : COMMENT_MARKERS) {
-                    int index = line.indexOf(marker);
-                    if(index!=-1 && (commentIndex==-1 || index<commentIndex)) {
-                        commentIndex = index;
-                    }
-                }
-                if(commentIndex != -1) {
-                    line = line.substring(0, commentIndex);
-                }
-                sb.append(line.replaceAll(" ", ""));
-            }
-            hex = sb.toString();
-        } finally {
-            if(reader != null) {
-                reader.close();
-            }
-        }
+        org.edward.pandora.common.util.FileReader fileReader = new org.edward.pandora.common.util.FileReader();
+        String hex = fileReader.read(dataPath);
+        hex = hex.replaceAll(" ", "");
         logger.info("decoding data [{}]", DATA_PATH);
         ProtocolDecoder decoder = new ProtocolDecoder(papers);
         Info info = decoder.decode(DataUtil.hexToBytes(hex));
