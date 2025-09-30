@@ -109,9 +109,37 @@ public class EvaluatorTest {
     @Test
     public void testLetStatement() throws Exception {
         StringBuilder sb = new StringBuilder();
-        sb.append("let a = 5;").append("\n");
-        sb.append("a;").append("\n");
-        sb.append("a + 2;").append("\n");
+//        sb.append("let a = 5;").append("\n");
+//        sb.append("a;").append("\n");
+//        sb.append("a + 2;").append("\n");
+        sb.append("let add = fn(x) { x+2 };").append("\n");
+        sb.append("add;").append("\n");
+        Lexer lexer = new Lexer(sb.toString());
+        Parser parser = new Parser(lexer);
+        Program program = parser.parseProgram();
+        Evaluator evaluator = new Evaluator();
+        Environment env = new Environment();
+        Element result = evaluator.eval(program, env);
+        System.out.println(result.inspect());
+    }
+
+    @Test
+    public void testCallStatement() throws Exception {
+        StringBuilder sb = new StringBuilder();
+//        sb.append("let add = fn(x) { x+2 };").append("\n");
+//        sb.append("add(3);").append("\n");
+//        sb.append("fn(x){x>10} (3);").append("\n");
+//        sb.append("let add = fn(x) { if(x>10){99}else{-1} };").append("\n");
+//        sb.append("add(3);").append("\n");
+//        sb.append("fn(x) { if(x>10){99}else{-1} } (3);").append("\n");
+        sb.append("let adder = fn(x) { fn(y){x+y;} };").append("\n");
+        sb.append("let add = adder(2);").append("\n");
+        sb.append("add(3);").append("\n");
+//        sb.append("let add = fn(a,b) { a+b };").append("\n");
+//        sb.append("let sub = fn(a,b) { a-b };").append("\n");
+//        sb.append("let applyFunc = fn(a,b,func) { func(a,b); };").append("\n");
+//        sb.append("applyFunc(2,5,add);").append("\n");
+//        sb.append("applyFunc(2,5,sub);").append("\n");
         Lexer lexer = new Lexer(sb.toString());
         Parser parser = new Parser(lexer);
         Program program = parser.parseProgram();

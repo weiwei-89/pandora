@@ -21,6 +21,10 @@ public class FunctionLiteralExpression implements Expression {
         return token;
     }
 
+    public List<IdentifierExpression> getParameters() {
+        return this.parameters;
+    }
+
     public void addParameter(IdentifierExpression identifier) {
         this.parameters.add(identifier);
     }

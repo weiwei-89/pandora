@@ -22,6 +22,14 @@ public class CallExpression implements Expression {
         return token;
     }
 
+    public Expression getFunction() {
+        return this.function;
+    }
+
+    public List<Expression> getArguments() {
+        return this.arguments;
+    }
+
     public void addArguments(List<Expression> arguments) {
         this.arguments.addAll(arguments);
     }

@@ -10,6 +10,7 @@ import org.edward.pandora.monkey.model.statement.ReturnStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,10 @@ public class Evaluator {
         this.register(IfExpression.class, this::handleIfExpression);
         this.register(BlockStatement.class, this::handleBlockStatement);
         this.register(ReturnStatement.class, this::handleReturnStatement);
-        this.register(IdentifierExpression.class, this::handleIdentifierExpression);
         this.register(LetStatement.class, this::handleLetStatement);
+        this.register(IdentifierExpression.class, this::handleIdentifierExpression);
+        this.register(FunctionLiteralExpression.class, this::handleFunctionLiteralExpression);
+        this.register(CallExpression.class, this::handleCallExpression);
     }
 
     private <N extends Node> void register(Class<N> nodeType, EvalFunction<N, Environment, Element> handler) {
@@ -155,7 +158,7 @@ public class Evaluator {
             return this.eval(expression.getConsequence(), env);
         } else {
             if(expression.getAlternative() == null) {
-                return NullElement.INSTANCE;
+                return VoidElement.INSTANCE;
             }
             return this.eval(expression.getAlternative(), env);
         }
@@ -164,15 +167,18 @@ public class Evaluator {
     private Element handleBlockStatement(BlockStatement statement, Environment env) throws Exception {
         List<Statement> statementList = statement.getStatementList();
         if(statementList==null || statementList.size()==0) {
-            return NullElement.INSTANCE;
+            return VoidElement.INSTANCE;
         }
         Element result = null;
         for(Statement _statement : statementList) {
             result = this.eval(_statement, env);
-            if(result!=null && result.type()==Element.Type.VOID) {
+            if(result == null) {
                 continue;
             }
-            if(result!=null && result.type()==Element.Type.RETURN) {
+            if(result.type() == Element.Type.VOID) {
+                continue;
+            }
+            if(result.type() == Element.Type.RETURN) {
                 return result;
             }
         }
@@ -187,7 +193,7 @@ public class Evaluator {
     private Element handleLetStatement(LetStatement statement, Environment env) throws Exception {
         Element valueResult = this.eval(statement.getValue(), env);
         env.set(statement.getName().getValue(), valueResult);
-        return new VoidElement();
+        return VoidElement.INSTANCE;
     }
 
     private Element handleIdentifierExpression(IdentifierExpression expression, Environment env) throws Exception {
@@ -196,5 +202,42 @@ public class Evaluator {
             throw new EvaluateException(String.format("identifier \"%s\" not initialized", expression.getValue()));
         }
         return value;
+    }
+
+    private Element handleFunctionLiteralExpression(FunctionLiteralExpression expression, Environment env) throws Exception {
+        return new FunctionElement(expression.getParameters(), expression.getBody(), env);
+    }
+
+    private Element handleCallExpression(CallExpression expression, Environment env) throws Exception {
+        Element functionResult = this.eval(expression.getFunction(), env);
+        if(functionResult==null || functionResult.type()!=Element.Type.FUNCTION) {
+            throw new EvaluateException(String.format("\"%s\" is not a function", expression.string()));
+        }
+        FunctionElement functionElement = (FunctionElement) functionResult;
+        List<Element> argumentResultList = null;
+        List<Expression> arguments = expression.getArguments();
+        if(arguments!=null && arguments.size()>0) {
+            argumentResultList = new ArrayList<>(arguments.size());
+            for(Expression argument : arguments) {
+                argumentResultList.add(this.eval(argument, env));
+            }
+        }
+        Environment exEnv = new Environment(functionElement.getEnv());
+        List<IdentifierExpression> parameters = functionElement.getParameters();
+        if(parameters!=null && parameters.size()>0) {
+            for(int p=0; p<parameters.size(); p++) {
+                IdentifierExpression parameter = parameters.get(p);
+                exEnv.set(parameter.getValue(), argumentResultList.get(p));
+            }
+        }
+        Element callResult = this.eval(functionElement.getBody(), exEnv);
+        if(callResult == null) {
+            return NullElement.INSTANCE;
+        }
+        if(callResult.type() == Element.Type.RETURN) {
+            ReturnElement returnResult = (ReturnElement) callResult;
+            return returnResult.getValue();
+        }
+        return callResult;
     }
 }

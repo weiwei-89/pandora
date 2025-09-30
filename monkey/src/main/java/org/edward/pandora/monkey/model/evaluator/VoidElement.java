@@ -2,7 +2,9 @@ package org.edward.pandora.monkey.model.evaluator;
 
 import org.edward.pandora.monkey.model.Element;
 
-public class VoidElement implements Element {
+public enum VoidElement implements Element {
+    INSTANCE;
+
     @Override
     public Type type() {
         return Type.VOID;
@@ -10,6 +12,6 @@ public class VoidElement implements Element {
 
     @Override
     public String inspect() {
-        return "";
+        return "void";
     }
 }
