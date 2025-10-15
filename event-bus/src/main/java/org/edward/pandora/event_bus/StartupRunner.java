@@ -1,8 +1,27 @@
 package org.edward.pandora.event_bus;
 
-import org.edward.pandora.common.task.IntervalTask;
-import org.edward.pandora.common.task.Processor;
-import org.edward.pandora.common.task.TaskPool;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.util.ReferenceCountUtil;
+import org.edward.pandora.common.model.User;
+import org.edward.pandora.common.netty.ext.client.Client;
+import org.edward.pandora.common.tcp.Connector;
+import org.edward.pandora.common.netty.ext.client.Session;
+import org.edward.pandora.common.netty.ext.handler.Heartbeater;
+import org.edward.pandora.common.netty.ext.handler.IdleHandler;
+import org.edward.pandora.common.netty.ext.handler.StatusHandler;
+import org.edward.pandora.common.netty.ext.server.Server;
+import org.edward.pandora.common.netty.ext.server.SessionManager;
+import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
+import org.edward.pandora.common.task.*;
+import org.edward.pandora.common.tcp.CommonSession;
+import org.edward.pandora.common.tcp.Config;
+import org.edward.pandora.common.util.DataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -16,20 +35,89 @@ import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.TimeUnit;
 
 @Order(1)
 @Component
 public class StartupRunner implements ApplicationRunner {
-    private TaskPool taskPool = TaskPool.getInstance();
+    private final TaskPool taskPool = TaskPool.getInstance();
+    private final ScheduledTaskPool scheduledTaskPool = ScheduledTaskPool.getInstance();
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        this.taskPool.addTask("scanning", new IntervalTask(new ScanningProcessor(), 5*1000));
+        this.taskPool.addTask("tcp-server", new GeneralTask(new TcpServerProcessor()));
+        this.scheduledTaskPool.addTask("scanning", new IntervalTask(new ScanningProcessor(), 5*1000));
+    }
+
+    private static class TcpServerProcessor implements Processor {
+        private static final Logger logger = LoggerFactory.getLogger(TcpServerProcessor.class);
+
+        @Override
+        public void process() throws Exception {
+            org.edward.pandora.common.netty.ext.server.Config config = new org.edward.pandora.common.netty.ext.server.Config();
+            config.setPort(8090);
+            StatusHandler statusHandler = new StatusHandler();
+            Server server = new Server(config);
+            server.setInitializer(new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(SocketChannel ch) throws Exception {
+                    ch.pipeline()
+                            .addLast(new IdleHandler(
+                                    100000L,
+                                    0,
+                                    0,
+                                    TimeUnit.MILLISECONDS)
+                            )
+                            .addLast(statusHandler)
+                            .addLast(new Heartbeater(100L))
+                            .addLast(new LineBasedFrameDecoder(512))
+                            .addLast(new ChannelInboundHandlerAdapter() {
+                                @Override
+                                public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                                    if(evt instanceof Heartbeater.HeartbeatEvent) {
+//                                        logger.info("tick......");
+                                    }
+                                    super.userEventTriggered(ctx, evt);
+                                }
+
+                                @Override
+                                public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                    org.edward.pandora.common.netty.ext.server.Session session = new org.edward.pandora.common.netty.ext.server.Session();
+                                    session.setChannel(ctx.channel());
+                                    SessionManager.addSession(session);
+                                    super.channelActive(ctx);
+                                }
+
+                                @Override
+                                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                                    try {
+                                        if(msg instanceof ByteBuf) {
+                                            ByteBuf buffer = (ByteBuf) msg;
+                                            logger.info("hex: {}",
+                                                    DataUtil.toHexString(ByteBufUtil.getReadableBytes(buffer)));
+                                        }
+                                    } finally {
+                                        ReferenceCountUtil.release(msg, ReferenceCountUtil.refCnt(msg));
+                                    }
+                                }
+                            });
+                }
+            });
+            server.startup();
+        }
     }
 
     private static class ScanningProcessor implements Processor {
         private static final Logger logger = LoggerFactory.getLogger(ScanningProcessor.class);
         private static final String APP_BASE_FOLDER_PATH = "D:\\edward\\test\\pandora\\event-bus\\app";
+        private static final Connector<Channel> connector = new Connector<Channel>() {
+            private final Client client = Client.build();
+
+            @Override
+            protected CommonSession<Channel> buildSession(Config config, User user) {
+                return Session.create(this.client.getGroup(), this.client, config, user);
+            }
+        };
 
         @Override
         public void process() throws Exception {
@@ -80,6 +168,14 @@ public class StartupRunner implements ApplicationRunner {
         }
 
         private void handleEvent(File file) throws Exception {
+            Config config = new Config();
+            config.setHost("localhost");
+            config.setPort(8090);
+            User user = new User();
+            user.setName("edward");
+            user.setPassword("123456");
+            CommonSession<Channel> session = connector.connect(config, user);
+            session.send("hello");
             Path targetPath = file.toPath().getParent().resolve("in_progress"+File.separator+file.getName());
             Files.createDirectories(targetPath.getParent());
             Files.move(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);

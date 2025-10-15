@@ -12,18 +12,20 @@ public abstract class AutoSession<C> extends CommonSession<C> {
 
     private ScheduledFuture<?> schedule;
 
-    public void init(ScheduledExecutorService executor) throws Exception {
-        super.init();
+    public AutoSession(ScheduledExecutorService executor) {
+        this.init(executor);
+    }
+
+    private void init(ScheduledExecutorService executor) {
         this.schedule = executor.scheduleWithFixedDelay(
-                new SessionTask<C>(this),
+                new SessionTask<>(this),
                 1000,
                 1000,
                 TimeUnit.MILLISECONDS
         );
     }
 
-    public void stop() {
-        this.close();
+    private void clear() throws Exception {
         if(this.schedule != null) {
             this.schedule.cancel(false);
             this.schedule = null;
@@ -31,9 +33,9 @@ public abstract class AutoSession<C> extends CommonSession<C> {
     }
 
     private static final class SessionTask<C> implements Runnable {
-        private final AutoSession<C> session;
+        private final CommonSession<C> session;
 
-        public SessionTask(AutoSession<C> session) {
+        public SessionTask(CommonSession<C> session) {
             this.session = session;
         }
 
@@ -44,16 +46,14 @@ public abstract class AutoSession<C> extends CommonSession<C> {
                 return;
             }
             logger.info("current session is inactive, trying to establish......");
-            C connection = null;
             try {
                 this.session.close();
-                connection = this.session.connect();
+                this.session.init();
             } catch(Exception e) {
                 logger.error("session establishment failed", e);
                 return;
             }
             logger.info("session established successfully");
-            this.session.setConnection(connection);
         }
     }
 }

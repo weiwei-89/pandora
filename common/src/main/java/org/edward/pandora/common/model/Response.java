@@ -1,10 +1,13 @@
 package org.edward.pandora.common.model;
 
 public class Response {
-    private final int code;
-    private final Object msg;
+    public static final int OK = 200;
+    public static final int ERROR = 500;
 
-    public Response(int code, Object msg) {
+    private final int code;
+    private final String msg;
+
+    public Response(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -12,7 +15,7 @@ public class Response {
     public int getCode() {
         return code;
     }
-    public Object getMsg() {
+    public String getMsg() {
         return msg;
     }
 
@@ -21,7 +24,20 @@ public class Response {
     public Object getData() {
         return data;
     }
-    public void setData(Object data) {
+    public Response setData(Object data) {
         this.data = data;
+        return this;
+    }
+
+    public static Response ok() {
+        return new Response(OK, "ok");
+    }
+
+    public static Response error() {
+        return new Response(ERROR, "error");
+    }
+
+    public static Response error(String msg) {
+        return new Response(ERROR, msg);
     }
 }
