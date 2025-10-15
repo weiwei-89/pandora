@@ -1,9 +1,10 @@
 package org.edward.pandora.common.task;
 
-public abstract class IntervalTask extends CommonTask {
+public class IntervalTask extends CommonTask {
     private final long interval;
 
-    public IntervalTask(long interval) {
+    public IntervalTask(Processor processor, long interval) {
+        super(processor);
         this.interval = interval;
     }
 

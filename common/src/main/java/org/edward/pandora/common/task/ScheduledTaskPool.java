@@ -8,36 +8,38 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TaskPool {
-    private static final Logger logger = LoggerFactory.getLogger(TaskPool.class);
+public class ScheduledTaskPool {
+    private static final Logger logger = LoggerFactory.getLogger(ScheduledTaskPool.class);
+    private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
-    private final Map<String, Future<?>> taskMap = new HashMap<>();
-    private final ExecutorService pool = Executors.newCachedThreadPool(
+    private final Map<String, ScheduledFuture<?>> taskMap = new HashMap<>();
+    private final ScheduledExecutorService pool = Executors.newScheduledThreadPool(
+            AVAILABLE_PROCESSORS,
             new ThreadFactory() {
                 private final AtomicInteger count = new AtomicInteger(0);
 
                 @Override
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
-                    t.setName(String.format("task-pool-%s", this.count.getAndIncrement()));
+                    t.setName(String.format("scheduled-task-pool-%s", this.count.getAndIncrement()));
                     t.setDaemon(true);
                     return t;
                 }
             });
 
-    private TaskPool() {
+    private ScheduledTaskPool() {
 
     }
 
     private static class SingletonHolder {
-        private static final TaskPool INSTANCE = new TaskPool();
+        private static final ScheduledTaskPool INSTANCE = new ScheduledTaskPool();
     }
 
-    public static TaskPool getInstance() {
-        return TaskPool.SingletonHolder.INSTANCE;
+    public static ScheduledTaskPool getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
-    public ExecutorService getPool() {
+    public ScheduledExecutorService getPool() {
         return this.pool;
     }
 
@@ -46,7 +48,12 @@ public class TaskPool {
             logger.info("task exists [{}]", taskName);
             return;
         }
-        Future<?> future = this.pool.submit(task);
+        ScheduledFuture<?> future = this.pool.scheduleWithFixedDelay(
+                task,
+                1000,
+                1000,
+                TimeUnit.MILLISECONDS
+        );
         this.taskMap.put(taskName, future);
         logger.info("task added [{}]", taskName);
     }
@@ -56,7 +63,7 @@ public class TaskPool {
             logger.info("task does not exist [{}]", taskName);
             return;
         }
-        Future<?> future = this.taskMap.get(taskName);
+        ScheduledFuture<?> future = this.taskMap.get(taskName);
         future.cancel(true);
         this.taskMap.remove(taskName);
     }

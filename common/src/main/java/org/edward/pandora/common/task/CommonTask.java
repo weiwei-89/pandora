@@ -1,6 +1,14 @@
 package org.edward.pandora.common.task;
 
-public abstract class CommonTask extends TriggeredTask implements Runnable {
+public abstract class CommonTask implements Runnable {
+    private final Processor processor;
+
+    public CommonTask(Processor processor) {
+        this.processor = processor;
+    }
+
+    protected abstract boolean trigger();
+
     protected void done(boolean result) {
 
     }
@@ -16,7 +24,10 @@ public abstract class CommonTask extends TriggeredTask implements Runnable {
         try {
             triggered = this.trigger();
             if(triggered) {
-                this.process();
+                if(this.processor == null) {
+                    throw new Exception("processor is not set");
+                }
+                this.processor.process();
                 result = true;
             }
         } catch(Exception e) {
