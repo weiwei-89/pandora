@@ -1,4 +1,4 @@
-package org.edward;
+package org.edward.pandora.common;
 
 public class Main {
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package org.edward.pandora;
+package org.edward.pandora.monkey;
 
 public class Main {
     public static void main(String[] args) {
