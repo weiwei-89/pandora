@@ -10,7 +10,7 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.util.ReferenceCountUtil;
 import org.edward.pandora.common.model.User;
 import org.edward.pandora.common.netty.ext.client.Client;
-import org.edward.pandora.common.tcp.Connector;
+import org.edward.pandora.common.tcp.*;
 import org.edward.pandora.common.netty.ext.client.Session;
 import org.edward.pandora.common.netty.ext.handler.Heartbeater;
 import org.edward.pandora.common.netty.ext.handler.IdleHandler;
@@ -19,8 +19,6 @@ import org.edward.pandora.common.netty.ext.server.Server;
 import org.edward.pandora.common.netty.ext.server.SessionManager;
 import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
 import org.edward.pandora.common.task.*;
-import org.edward.pandora.common.tcp.CommonSession;
-import org.edward.pandora.common.tcp.Config;
 import org.edward.pandora.common.util.DataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +49,11 @@ public class StartupRunner implements ApplicationRunner {
 
     private static class TcpServerProcessor implements Processor {
         private static final Logger logger = LoggerFactory.getLogger(TcpServerProcessor.class);
+
+        @Override
+        public void init() throws Exception {
+
+        }
 
         @Override
         public void process() throws Exception {
@@ -110,14 +113,27 @@ public class StartupRunner implements ApplicationRunner {
     private static class ScanningProcessor implements Processor {
         private static final Logger logger = LoggerFactory.getLogger(ScanningProcessor.class);
         private static final String APP_BASE_FOLDER_PATH = "D:\\edward\\test\\pandora\\event-bus\\app";
-        private static final Connector<Channel> connector = new Connector<Channel>() {
-            private final Client client = Client.build();
-
+        private static final Connector<Channel> connector = new Connector<Channel>(Client.build()) {
             @Override
-            protected CommonSession<Channel> buildSession(Config config, User user) {
-                return Session.create(this.client.getGroup(), this.client, config, user);
+            protected CommonSession<Channel> buildSession(TcpClient<Channel> client, Config config, User user) {
+                Client client0 = (Client) client;
+                return Session.create(client0.getGroup(), client, config, user);
             }
         };
+
+        private Config config;
+
+        @Override
+        public void init() throws Exception {
+            Config config = new Config();
+            config.setHost("localhost");
+            config.setPort(8090);
+            this.config = config;
+            User user = new User();
+            user.setName("edward");
+            user.setPassword("123456");
+            connector.connect(config, user);
+        }
 
         @Override
         public void process() throws Exception {
@@ -168,17 +184,22 @@ public class StartupRunner implements ApplicationRunner {
         }
 
         private void handleEvent(File file) throws Exception {
-            Config config = new Config();
-            config.setHost("localhost");
-            config.setPort(8090);
-            User user = new User();
-            user.setName("edward");
-            user.setPassword("123456");
-            CommonSession<Channel> session = connector.connect(config, user);
-            session.send("hello");
-            Path targetPath = file.toPath().getParent().resolve("in_progress"+File.separator+file.getName());
-            Files.createDirectories(targetPath.getParent());
-            Files.move(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            SessionFuture future = connector.send(this.config, "hello");
+            future.addListener(new FutureListener() {
+                @Override
+                public void onComplete() throws Exception {
+                    logger.info("server notification completed");
+                    // TODO 迁移到服务端去做
+                    Path targetPath = file.toPath().getParent().resolve("in_progress"+File.separator+file.getName());
+                    Files.createDirectories(targetPath.getParent());
+                    Files.move(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                @Override
+                public void onError(Throwable cause) {
+                    logger.error(cause.getMessage(), cause);
+                }
+            });
         }
     }
 }

@@ -7,6 +7,7 @@ import org.edward.pandora.common.netty.ext.client.*;
 import org.edward.pandora.common.tcp.CommonSession;
 import org.edward.pandora.common.tcp.Config;
 import org.edward.pandora.common.tcp.Connector;
+import org.edward.pandora.common.tcp.TcpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,29 +31,22 @@ public class TcpClientTest {
         user.setName("edward");
         user.setPassword("123456");
         Connector<Channel> connector = null;
-        CommonSession<Channel> session = null;
         try {
-            connector = new Connector<Channel>() {
-                private final Client client = Client.build();
-
+            connector = new Connector<Channel>(Client.build()) {
                 @Override
-                protected CommonSession<Channel> buildSession(Config config, User user) {
-                    return Session.create(this.client.getGroup(), this.client, config, user);
+                protected CommonSession<Channel> buildSession(TcpClient<Channel> client, Config config, User user) {
+                    Client client0 = (Client) client;
+                    return Session.create(client0.getGroup(), client, config, user);
                 }
             };
-            session = connector.connect(config, user);
-            session.send("hello");
-            Thread.sleep(15000L);
-//            session.close();
-//            session.stop();
-//            connector.shutdown();
-            Thread.sleep(30000L);
+            connector.connect(config, user);
+            connector.send(config, "hello");
         } finally {
-            if(session != null) {
-                session.close();
+            if(connector != null) {
+                connector.close(config);
             }
             if(connector != null) {
-//                connector.shutdown();
+                connector.shutdown();
             }
         }
     }

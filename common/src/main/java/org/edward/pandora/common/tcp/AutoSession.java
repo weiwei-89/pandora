@@ -25,13 +25,6 @@ public abstract class AutoSession<C> extends CommonSession<C> {
         );
     }
 
-    private void clear() throws Exception {
-        if(this.schedule != null) {
-            this.schedule.cancel(false);
-            this.schedule = null;
-        }
-    }
-
     private static final class SessionTask<C> implements Runnable {
         private final CommonSession<C> session;
 
@@ -54,6 +47,19 @@ public abstract class AutoSession<C> extends CommonSession<C> {
                 return;
             }
             logger.info("session established successfully");
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        logger.info("clear auto session");
+        this.clear();
+    }
+
+    private void clear() throws Exception {
+        if(this.schedule != null) {
+            this.schedule.cancel(false);
+            this.schedule = null;
         }
     }
 }

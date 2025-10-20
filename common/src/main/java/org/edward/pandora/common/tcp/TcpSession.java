@@ -5,7 +5,7 @@ public interface TcpSession<C> {
 
     boolean isActive();
 
-    void send(String info) throws Exception;
+    SessionFuture send(String info) throws Exception;
 
     void close() throws Exception;
 }

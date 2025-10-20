@@ -5,6 +5,11 @@ public abstract class CommonTask implements Runnable {
 
     public CommonTask(Processor processor) {
         this.processor = processor;
+        try {
+            processor.init();
+        } catch(Exception e) {
+            this.error(e);
+        }
     }
 
     protected abstract boolean trigger();

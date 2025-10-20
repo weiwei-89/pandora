@@ -1,11 +1,11 @@
 package org.edward.pandora.common.netty.ext.client;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.edward.pandora.common.model.User;
 import org.edward.pandora.common.task.ScheduledTaskPool;
-import org.edward.pandora.common.tcp.AutoSession;
-import org.edward.pandora.common.tcp.Config;
-import org.edward.pandora.common.tcp.TcpClient;
+import org.edward.pandora.common.tcp.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,13 +61,27 @@ public class Session extends AutoSession<Channel> {
     }
 
     @Override
-    public void send(String info) throws Exception {
+    public SessionFuture send(String info) throws Exception {
         logger.info("sending info......");
-        this.getConnection().writeAndFlush(this.getConnection().alloc().buffer().writeBytes(info.getBytes()));
+        CompleteFuture completeFuture = new CompleteFuture();
+        ChannelFuture future = this.getConnection().writeAndFlush(this.getConnection().alloc().buffer().writeBytes(info.getBytes()));
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if(future.isSuccess()) {
+                    completeFuture.complete();
+                } else {
+                    completeFuture.error(future.cause());
+                }
+            }
+        });
+        return completeFuture;
     }
 
     @Override
     public void close() throws Exception {
+        super.close();
+        logger.info("close session");
         if(this.getConnection() == null) {
             return;
         }
