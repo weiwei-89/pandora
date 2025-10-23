@@ -3,6 +3,7 @@ package org.edward.pandora.common.codec.rsa;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class KeyGenerator {
@@ -21,7 +22,7 @@ public class KeyGenerator {
 
     public static PublicKey toPublicKey(String base64) throws Exception {
         byte[] bytes = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.UTF_8));
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
         KeyFactory factory = KeyFactory.getInstance(ALGORITHM);
         return factory.generatePublic(spec);
     }
