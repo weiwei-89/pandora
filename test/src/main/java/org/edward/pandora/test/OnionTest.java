@@ -2,7 +2,9 @@ package org.edward.pandora.test;
 
 import com.alibaba.fastjson2.JSON;
 import org.edward.pandora.onion.Knife;
+import org.edward.pandora.onion.KnifeV2;
 import org.edward.pandora.onion.bind.annotation.Cut;
+import org.edward.pandora.onion.value.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +22,13 @@ public class OnionTest {
         Classroom classroom = new Classroom();
         classroom.addStudent(lilei);
         classroom.addStudent(hanmeimei);
-        Knife knife = Knife.build();
-        Object result = knife.peel(classroom);
+//        Knife knife = Knife.build();
+//        Object result = knife.peel(classroom);
+//        System.out.println(JSON.toJSONString(result));
+        KnifeV2 knifeV2 = KnifeV2.build();
+        Value result = knifeV2.peel(classroom);
         System.out.println(JSON.toJSONString(result));
+        System.out.println(result.inspect());
     }
 
     public static class Classroom {
