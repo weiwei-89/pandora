@@ -27,8 +27,8 @@ public class HttpServerTest {
         Config config = new Config();
         config.setPort(listenPort);
         StatusHandler statusHandler = new StatusHandler();
-        ApiLoader apiLoader = new ApiLoader();
-        apiLoader.scan("org.edward.pandora.test.controller");
+        ApiLoader apiLoader = new ApiLoader("org.edward.pandora.test.controller");
+        apiLoader.init();
         Server server = new Server(config);
         server.setInitializer(new ChannelInitializer<SocketChannel>() {
             @Override

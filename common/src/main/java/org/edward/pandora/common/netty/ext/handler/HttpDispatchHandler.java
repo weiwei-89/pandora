@@ -43,7 +43,7 @@ public class HttpDispatchHandler extends MessageToMessageDecoder<FullHttpRequest
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("HttpDispatchHandler error", cause);
         super.exceptionCaught(ctx, cause);
+        logger.error("HttpDispatchHandler error", cause);
     }
 }

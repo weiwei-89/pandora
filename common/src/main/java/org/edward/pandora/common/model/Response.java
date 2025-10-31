@@ -13,16 +13,16 @@ public class Response {
     }
 
     public int getCode() {
-        return code;
+        return this.code;
     }
     public String getMsg() {
-        return msg;
+        return this.msg;
     }
 
     private Object data;
 
     public Object getData() {
-        return data;
+        return this.data;
     }
     public Response setData(Object data) {
         this.data = data;

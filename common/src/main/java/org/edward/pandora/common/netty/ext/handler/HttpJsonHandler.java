@@ -27,7 +27,7 @@ public class HttpJsonHandler extends SimpleChannelInboundHandler<FullHttpRequest
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("HttpJsonHandler error", cause);
         super.exceptionCaught(ctx, cause);
+        logger.error("HttpJsonHandler error", cause);
     }
 }

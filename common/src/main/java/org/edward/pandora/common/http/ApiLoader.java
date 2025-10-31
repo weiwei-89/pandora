@@ -9,29 +9,29 @@ import org.reflections.util.ConfigurationBuilder;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ApiLoader {
-    private final Map<String, Object> instanceMap = new HashMap<>();
-    private final Map<String, Method> methodMap = new HashMap<>();
-    private final Map<String, String> methodInstanceMap = new HashMap<>();
+    private final String path;
+    private final List<ApiFunction> apiFunctionList = new ArrayList<>();
+    private final Map<String, ApiFunction> apiFunctionMap = new HashMap<>();
     private final ObjectMapper objectMapper;
 
-    public ApiLoader() {
+    public ApiLoader(String path) {
+        this.path = path;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    private static String generateMethodPath(Path classAnnotation, Path methodAnnotation) {
-        return String.format("/%s/%s", classAnnotation.value(), methodAnnotation.value());
+    public void init() throws Exception {
+        this.scan();
+        this.process();
     }
 
-    public void scan(String path) throws Exception {
+    private void scan() throws Exception {
         Reflections reflections = new Reflections(
                 new ConfigurationBuilder()
-                        .forPackages(path)
+                        .forPackages(this.path)
                         .setScanners(Scanners.TypesAnnotated)
         );
         Set<Class<?>> pathClassSet = reflections.getTypesAnnotatedWith(Path.class);
@@ -41,7 +41,7 @@ public class ApiLoader {
         for(Class<?> clazz : pathClassSet) {
             Path classAnnotation = clazz.getAnnotation(Path.class);
             Object instance = clazz.getDeclaredConstructor().newInstance();
-            this.setInstance(classAnnotation.value(), instance);
+            ApiEntrance apiEntrance = new ApiEntrance(classAnnotation.value(), instance);
             Method[] methods = clazz.getDeclaredMethods();
             if(methods==null || methods.length==0) {
                 continue;
@@ -51,62 +51,88 @@ public class ApiLoader {
                 if(methodAnnotation == null) {
                     continue;
                 }
-                String methodPath = generateMethodPath(classAnnotation, methodAnnotation);
-                this.setMethod(methodPath, method);
-                this.bindMethodToInstance(methodPath, classAnnotation.value());
+                ApiFunction apiFunction = new ApiFunction(methodAnnotation.value(), method, apiEntrance);
+                this.apiFunctionList.add(apiFunction);
             }
         }
     }
 
-    private void setInstance(String path, Object instance) throws Exception {
-        if(this.instanceMap.containsKey(path)) {
+    private void process() throws Exception {
+        if(this.apiFunctionList.size() == 0) {
             return;
         }
-        this.instanceMap.put(path, instance);
-    }
-
-    private void setMethod(String path, Method method) {
-        if(this.methodMap.containsKey(path)) {
-            return;
+        for(int i=0; i<this.apiFunctionList.size(); i++) {
+            ApiFunction apiFunction = this.apiFunctionList.get(i);
+            String fullPath = generateFullPath(apiFunction.getEntrance().getPath(), apiFunction.getPath());
+            if(this.apiFunctionMap.containsKey(fullPath)) {
+                throw new Exception(String.format("the full path is duplicated [%s]", fullPath));
+            }
+            this.apiFunctionMap.put(fullPath, apiFunction);
         }
-        this.methodMap.put(path, method);
     }
 
-    private void bindMethodToInstance(String methodPath, String instancePath) {
-        if(this.methodInstanceMap.containsKey(methodPath)) {
-            return;
-        }
-        this.methodInstanceMap.put(methodPath, instancePath);
+    private static String generateFullPath(String entrancePath, String functionPath) {
+        return String.format("/%s/%s", entrancePath, functionPath);
     }
 
-    public <T> T getBean(String path) {
-        return (T) this.instanceMap.get(path);
+    public <T> T getBean(String path, Class<T> clazz) {
+        return clazz.cast(this.apiFunctionMap.get(path).getEntrance().getInstance());
     }
 
     public Object execute(String path, String json) throws Exception {
-        Method method = this.methodMap.get(path);
+        ApiFunction apiFunction = this.apiFunctionMap.get(path);
+        Method method = apiFunction.getInstance();
         Parameter[] parameters = method.getParameters();
         if(parameters==null || parameters.length==0) {
-            return method.invoke(this.getBean(this.methodInstanceMap.get(path)));
+            return method.invoke(apiFunction.getEntrance().getInstance());
         }
-        Object[] args = new Object[parameters.length];
+        Object[] argArray = new Object[parameters.length];
         for(int i=0; i<parameters.length; i++) {
             Parameter parameter = parameters[i];
             if(parameter.isAnnotationPresent(JsonParam.class)) {
                 if(StringUtils.isBlank(json)) {
-                    args[i] = null;
+                    argArray[i] = null;
                     continue;
                 }
                 Class<?> parameterType = parameter.getType();
                 if(parameterType == String.class) {
-                    args[i] = json;
+                    argArray[i] = json;
                 } else {
-                    args[i] = this.objectMapper.readValue(json, parameterType);
+                    argArray[i] = this.objectMapper.readValue(json, parameterType);
                 }
             } else {
-                args[i] = null;
+                argArray[i] = null;
             }
         }
-        return method.invoke(this.getBean(this.methodInstanceMap.get(path)), args);
+        return method.invoke(apiFunction.getEntrance().getInstance(), argArray);
+    }
+
+    public Object execute(String path, Object... args) throws Exception {
+        ApiFunction apiFunction = this.apiFunctionMap.get(path);
+        Method method = apiFunction.getInstance();
+        Parameter[] parameters = method.getParameters();
+        if(parameters==null || parameters.length==0) {
+            return method.invoke(apiFunction.getEntrance().getInstance());
+        }
+        Object[] argArray = new Object[parameters.length];
+        for(int i=0; i<parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            Object arg = args[i];
+            if(parameter.isAnnotationPresent(JsonParam.class)) {
+                if(arg == null) {
+                    argArray[i] = null;
+                    continue;
+                }
+                Class<?> parameterType = parameter.getType();
+                if(parameterType == String.class) {
+                    argArray[i] = arg;
+                } else {
+                    argArray[i] = this.objectMapper.readValue(arg.toString(), parameterType);
+                }
+            } else {
+                argArray[i] = arg;
+            }
+        }
+        return method.invoke(apiFunction.getEntrance().getInstance(), argArray);
     }
 }

@@ -27,25 +27,20 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        Response response = new Response(200, "ok");
-        response.setData(msg);
-        FullHttpResponse httpResponse = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1,
-                HttpResponseStatus.OK,
-                Unpooled.copiedBuffer(this.objectMapper.writeValueAsString(response), CharsetUtil.UTF_8)
-        );
-        httpResponse.headers()
-                .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
-                .set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes())
-                .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+        Response response = Response.ok().setData(msg);
+        FullHttpResponse httpResponse = this.buildHttpResponse(response);
         ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("HttpResponseHandler error", cause);
-        Response response = new Response(500, "error");
-        response.setData(cause.getMessage());
+        Response response = Response.error(cause.getMessage());
+        FullHttpResponse httpResponse = this.buildHttpResponse(response);
+        ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+    }
+
+    private FullHttpResponse buildHttpResponse(Response response) throws Exception {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
@@ -55,6 +50,6 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
                 .set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
                 .set(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes())
                 .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-        ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
+        return httpResponse;
     }
 }

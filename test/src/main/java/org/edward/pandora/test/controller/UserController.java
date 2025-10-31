@@ -18,6 +18,7 @@ public class UserController {
 
     @Path("shoot")
     public void shoot(String token, @JsonParam String json) {
+        logger.info("token: {}", token);
         logger.info("json: {}", json);
     }
 
