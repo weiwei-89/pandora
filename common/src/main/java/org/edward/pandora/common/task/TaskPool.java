@@ -46,7 +46,16 @@ public class TaskPool {
             logger.info("task exists [{}]", taskName);
             return;
         }
-        Future<?> future = this.pool.submit(task);
+        Runnable innerTask = () -> {
+            try {
+                task.run();
+            } catch(Exception e) {
+                logger.error("task error", e);
+            } finally {
+                this.taskMap.remove(taskName);
+            }
+        };
+        Future<?> future = this.pool.submit(innerTask);
         this.taskMap.put(taskName, future);
         logger.info("task added [{}]", taskName);
     }
