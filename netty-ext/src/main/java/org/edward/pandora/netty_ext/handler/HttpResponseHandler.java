@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.handler;
+package org.edward.pandora.netty_ext.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;

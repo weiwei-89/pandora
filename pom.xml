@@ -16,6 +16,7 @@
         <module>monkey</module>
         <module>test</module>
         <module>event-bus</module>
+        <module>netty-ext</module>
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

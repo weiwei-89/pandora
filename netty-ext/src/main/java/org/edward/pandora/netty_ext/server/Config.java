@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.server;
+package org.edward.pandora.netty_ext.server;
 
 public class Config {
     private int port;

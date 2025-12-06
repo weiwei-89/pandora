@@ -9,17 +9,17 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.util.ReferenceCountUtil;
 import org.edward.pandora.common.model.User;
-import org.edward.pandora.common.netty.ext.client.Client;
 import org.edward.pandora.common.tcp.*;
-import org.edward.pandora.common.netty.ext.client.Session;
-import org.edward.pandora.common.netty.ext.handler.Heartbeater;
-import org.edward.pandora.common.netty.ext.handler.IdleHandler;
-import org.edward.pandora.common.netty.ext.handler.StatusHandler;
-import org.edward.pandora.common.netty.ext.server.Server;
-import org.edward.pandora.common.netty.ext.server.SessionManager;
-import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
 import org.edward.pandora.common.task.*;
 import org.edward.pandora.common.util.DataUtil;
+import org.edward.pandora.netty_ext.client.Client;
+import org.edward.pandora.netty_ext.client.Session;
+import org.edward.pandora.netty_ext.handler.Heartbeater;
+import org.edward.pandora.netty_ext.handler.IdleHandler;
+import org.edward.pandora.netty_ext.handler.StatusHandler;
+import org.edward.pandora.netty_ext.server.Server;
+import org.edward.pandora.netty_ext.server.SessionManager;
+import org.edward.pandora.netty_ext.util.ByteBufUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -57,7 +57,7 @@ public class StartupRunner implements ApplicationRunner {
 
         @Override
         public void process() throws Exception {
-            org.edward.pandora.common.netty.ext.server.Config config = new org.edward.pandora.common.netty.ext.server.Config();
+            org.edward.pandora.netty_ext.server.Config config = new org.edward.pandora.netty_ext.server.Config();
             config.setPort(8090);
             StatusHandler statusHandler = new StatusHandler();
             Server server = new Server(config);
@@ -85,7 +85,7 @@ public class StartupRunner implements ApplicationRunner {
 
                                 @Override
                                 public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                    org.edward.pandora.common.netty.ext.server.Session session = new org.edward.pandora.common.netty.ext.server.Session();
+                                    org.edward.pandora.netty_ext.server.Session session = new org.edward.pandora.netty_ext.server.Session();
                                     session.setChannel(ctx.channel());
                                     SessionManager.addSession(session);
                                     super.channelActive(ctx);

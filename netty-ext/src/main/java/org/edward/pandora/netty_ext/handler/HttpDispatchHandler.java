@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.handler;
+package org.edward.pandora.netty_ext.handler;
 
 import com.alibaba.fastjson2.JSON;
 import io.netty.buffer.ByteBuf;
@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.FullHttpRequest;
 import org.edward.pandora.common.http.ApiLoader;
-import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
+import org.edward.pandora.netty_ext.util.ByteBufUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

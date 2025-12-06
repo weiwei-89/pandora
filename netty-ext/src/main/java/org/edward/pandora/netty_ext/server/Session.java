@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.server;
+package org.edward.pandora.netty_ext.server;
 
 import io.netty.channel.Channel;
 import org.edward.pandora.common.model.User;

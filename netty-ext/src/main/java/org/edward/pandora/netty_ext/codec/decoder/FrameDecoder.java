@@ -1,23 +1,23 @@
-package org.edward.pandora.common.netty.ext.codec.decoder;
+package org.edward.pandora.netty_ext.codec.decoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import org.edward.pandora.common.netty.ext.util.ByteBufUtil;
+import org.edward.pandora.netty_ext.util.ByteBufUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class ElasticFrameDecoder extends ByteToMessageDecoder {
-    private static final Logger logger = LoggerFactory.getLogger(ElasticFrameDecoder.class);
+public class FrameDecoder extends ByteToMessageDecoder {
+    private static final Logger logger = LoggerFactory.getLogger(FrameDecoder.class);
 
     private final byte[] delimiter;
-    private final int maxLength;
+    private final int length;
 
-    public ElasticFrameDecoder(byte[] delimiter, int maxLength) {
+    public FrameDecoder(byte[] delimiter, int length) {
         this.delimiter = delimiter;
-        this.maxLength = maxLength;
+        this.length = length;
     }
 
     private boolean findDelimiter = false;
@@ -25,15 +25,15 @@ public class ElasticFrameDecoder extends ByteToMessageDecoder {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        logger.info("ElasticFrameDecoder added");
-        if(this.maxLength <= this.delimiter.length) {
-            throw new Exception("the max length of one frame must be greater than the delimiter");
+        logger.info("FrameDecoder added");
+        if(this.length <= this.delimiter.length) {
+            throw new Exception("the length of one frame must be greater than the delimiter");
         }
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if(in.readableBytes() < this.delimiter.length) {
+        if(in.readableBytes() < this.length) {
             return;
         }
         if(this.findDelimiter) {
@@ -67,28 +67,14 @@ public class ElasticFrameDecoder extends ByteToMessageDecoder {
     }
 
     private ByteBuf findTarget(ByteBuf in) {
-        if(in.readableBytes() < this.delimiter.length*2) {
+        if(in.readableBytes() < this.length) {
             return null;
         }
-        ByteBuf cache = in.slice(this.delimiter.length, in.readableBytes()-this.delimiter.length);
-        int nextDelimiterIndex = ByteBufUtil.index(cache, this.delimiter);
-        if(nextDelimiterIndex >= 0) {
-            int middleLength = this.delimiter.length + nextDelimiterIndex;
-            if(middleLength >= this.maxLength) {
-                return in.readRetainedSlice(this.maxLength);
-            } else {
-                return in.readRetainedSlice(middleLength);
-            }
-        } else {
-            if(in.readableBytes() >= this.maxLength) {
-                return in.readRetainedSlice(this.maxLength);
-            }
-        }
-        return null;
+        return in.readRetainedSlice(this.length);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("ElasticFrameDecoder error", cause);
+        logger.error("FrameDecoder error", cause);
     }
 }

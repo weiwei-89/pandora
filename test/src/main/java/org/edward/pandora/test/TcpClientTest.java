@@ -3,11 +3,12 @@ package org.edward.pandora.test;
 import io.netty.channel.Channel;
 import org.apache.commons.cli.*;
 import org.edward.pandora.common.model.User;
-import org.edward.pandora.common.netty.ext.client.*;
 import org.edward.pandora.common.tcp.CommonSession;
 import org.edward.pandora.common.tcp.Config;
 import org.edward.pandora.common.tcp.Connector;
 import org.edward.pandora.common.tcp.TcpClient;
+import org.edward.pandora.netty_ext.client.Client;
+import org.edward.pandora.netty_ext.client.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

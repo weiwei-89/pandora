@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.util;
+package org.edward.pandora.netty_ext.util;
 
 import io.netty.buffer.ByteBuf;
 

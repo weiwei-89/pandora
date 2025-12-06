@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.client;
+package org.edward.pandora.netty_ext.client;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

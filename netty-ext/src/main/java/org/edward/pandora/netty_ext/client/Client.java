@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.client;
+package org.edward.pandora.netty_ext.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -7,8 +7,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.edward.pandora.common.netty.ext.codec.encoder.Appender;
-import org.edward.pandora.common.netty.ext.handler.StatusHandler;
+import org.edward.pandora.netty_ext.codec.encoder.Appender;
+import org.edward.pandora.netty_ext.handler.StatusHandler;
 import org.edward.pandora.common.tcp.Config;
 import org.edward.pandora.common.tcp.TcpClient;
 

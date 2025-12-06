@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.codec.encoder;
+package org.edward.pandora.netty_ext.codec.encoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

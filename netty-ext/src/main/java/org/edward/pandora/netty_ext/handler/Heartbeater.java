@@ -1,4 +1,4 @@
-package org.edward.pandora.common.netty.ext.handler;
+package org.edward.pandora.netty_ext.handler;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
